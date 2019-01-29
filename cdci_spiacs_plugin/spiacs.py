@@ -90,7 +90,7 @@ def spiacs_factory():
     print('--> conf_file',conf_file)
     print('--> conf_dir', conf_dir)
 
-    return  Instrument('spi_acs',
+    return  Instrument('spi acs',
                        asynch=False,
                        data_serve_conf_file=conf_file,
                        src_query=src_query,
