@@ -256,7 +256,7 @@ class SpiacsLightCurveQuery(LightCurveQuery):
                                                         dy=query_lc.data.data_unit[0].data['rate_err'],
                                                         title='Start Time: %s'%instrument.get_par_by_name('T1')._astropy_time.utc.value,
                                                         x_label='Time  (s)',
-                                                        y_label='Rate  (cts)'))
+                                                        y_label='Rate  (cts/s)'))
 
             if api==True:
                 _data_list.append(query_lc.data)
