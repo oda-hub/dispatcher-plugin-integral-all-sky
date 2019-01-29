@@ -87,7 +87,8 @@ class SpicasLigthtCurve(LightCurveProduct):
                              res,
                              src_name='',
                              prod_prefix='spiacs_lc',
-                             out_dir=None):
+                             out_dir=None,
+                             delta_t=None):
 
 
 
@@ -115,9 +116,11 @@ class SpicasLigthtCurve(LightCurveProduct):
 
         #try:
         df=res.content.splitlines()
-
-        meta_data['time_bin'] = float(df[1].split()[1])
-
+        instr_t_bin=float(df[1].split()[1])
+        if delta_t is  None:
+            meta_data['time_bin'] = instr_t_bin
+        else:
+            meta_data['time_bin']=delta_t
 
 
         data = np.zeros(len(df)-3, dtype=[('rate', '<f8'), ('rate_err', '<f8'), ('time', '<f8')])
@@ -127,6 +130,25 @@ class SpicasLigthtCurve(LightCurveProduct):
             data['time'][ID] = float(t)
 
         data['rate_err']=np.sqrt(data['rate'])
+
+
+        if delta_t is not None:
+
+            t1=data['time'][0]-instr_t_bin*0.5
+            t2=data['time'][-1]+instr_t_bin*0.5
+            n_bins=int(t2-t1)/delta_t
+            binned_data = np.zeros(n_bins, dtype=[('rate', '<f8'), ('rate_err', '<f8'), ('time', '<f8')])
+            digitized_ids =np.digitize(data['time'],np.linspace(t1,t2,n_bins))
+            for ID,binned_id in enumerate(np.unique(digitized_ids)):
+
+                msk=digitized_ids==binned_id
+
+                binned_data['rate'][ID] = np.sum(data['rate'][msk])
+                binned_data['time'][ID] = np.mean(data['time'][msk])
+
+            binned_data['rate_err'] = np.sqrt(binned_data['rate'])
+
+            data=binned_data
 
         #data['rate'] = df['rate']
         #data['rate_err'] = df['rate_err']
@@ -164,12 +186,13 @@ class SpiacsLightCurveQuery(LightCurveQuery):
         src_name = 'query'
         #T1 = instrument.get_par_by_name('T1')._astropy_time
         #T2 = instrument.get_par_by_name('T2')._astropy_time
-
+        delta_t=instrument.get_par_by_name('time_bin')._astropy_time_delta.sec
 
         prod_list = SpicasLigthtCurve.build_from_res(res,
                                                       src_name=src_name,
                                                       prod_prefix=prod_prefix,
-                                                      out_dir=out_dir)
+                                                      out_dir=out_dir,
+                                                      delta_t=delta_t)
 
         # print('spectrum_list',spectrum_list)
 
