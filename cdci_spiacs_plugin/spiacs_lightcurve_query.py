@@ -124,9 +124,9 @@ class SpicasLigthtCurve(LightCurveProduct):
 
         data['rate_err']=np.sqrt(data['rate'])
 
-        data['rate'] = df['rate']
-        data['rate_err'] = df['rate_err']
-        data['time'] = df['time']
+        #data['rate'] = df['rate']
+        #data['rate_err'] = df['rate_err']
+        #data['time'] = df['time']
         npd = NumpyDataProduct(data_unit=NumpyDataUnit(data=data,
                                                        hdu_type='table'), meta_data=meta_data)
 
