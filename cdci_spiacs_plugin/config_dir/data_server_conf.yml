@@ -1,5 +1,5 @@
 instruments:
-  spiacs:
+  spi_acs:
       dispatcher_mnt_point:
       data_server_cache:
       dummy_cache: dummy_prods
