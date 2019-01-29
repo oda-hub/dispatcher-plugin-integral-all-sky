@@ -114,32 +114,32 @@ class SpicasLigthtCurve(LightCurveProduct):
         meta_data['time_bin'] = delta_t
 
 
-        try:
-            df=res.content.splitlines()
-            data = np.zeros(len(df-3), dtype=[('rate', '<f8'), ('rate_err', '<f8'), ('time', '<f8')])
-            for ID,d in enumerate(df[2:-1]):
-                t,r,_=d.split()
-                data['rate']=float(r)
-                data['time'] = float(t)
+        #try:
+        df=res.content.splitlines()
+        data = np.zeros(len(df-3), dtype=[('rate', '<f8'), ('rate_err', '<f8'), ('time', '<f8')])
+        for ID,d in enumerate(df[2:-1]):
+            t,r,_=d.split()
+            data['rate']=float(r)
+            data['time'] = float(t)
 
-            data['rate_err']=np.sqrt(data['rate'])
+        data['rate_err']=np.sqrt(data['rate'])
 
-            data['rate'] = df['rate']
-            data['rate_err'] = df['rate_err']
-            data['time'] = df['time']
-            npd = NumpyDataProduct(data_unit=NumpyDataUnit(data=data,
-                                                           hdu_type='table'), meta_data=meta_data)
+        data['rate'] = df['rate']
+        data['rate_err'] = df['rate_err']
+        data['time'] = df['time']
+        npd = NumpyDataProduct(data_unit=NumpyDataUnit(data=data,
+                                                       hdu_type='table'), meta_data=meta_data)
 
-            lc = cls(name=src_name, data=npd, header=None, file_name=file_name, out_dir=out_dir,
-                     prod_prefix=prod_prefix,
-                     src_name=src_name, meta_data=meta_data)
+        lc = cls(name=src_name, data=npd, header=None, file_name=file_name, out_dir=out_dir,
+                 prod_prefix=prod_prefix,
+                 src_name=src_name, meta_data=meta_data)
 
-            lc_list.append(lc)
-        except Exception as e:
+        lc_list.append(lc)
+        #except Exception as e:
 
 
 
-            raise SpiacsAnalysisException(message='spiacs light curve failed: %s'%e.__repr__(),debug_message=str(e))
+        #   raise SpiacsAnalysisException(message='spiacs light curve failed: %s'%e.__repr__(),debug_message=str(e))
 
 
 
