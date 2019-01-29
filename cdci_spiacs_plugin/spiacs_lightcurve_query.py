@@ -157,7 +157,7 @@ class SpiacsLightCurveQuery(LightCurveQuery):
         super(SpiacsLightCurveQuery, self).__init__(name)
 
     def build_product_list(self, instrument, res, out_dir, prod_prefix='spiacs_lc',api=False):
-        src_name = 'lc'
+        src_name = 'query'
         delta_t = instrument.get_par_by_name('time_bin')._astropy_time_delta.sec
         prod_list = SpicasLigthtCurve.build_from_res(res,
                                                       src_name=src_name,
@@ -174,7 +174,7 @@ class SpiacsLightCurveQuery(LightCurveQuery):
                               config=None):
 
 
-        src_name = 'lc'
+        src_name = 'query'
         T1=instrument.get_par_by_name('T1')._astropy_time
         T2=instrument.get_par_by_name('T2')._astropy_time
 
