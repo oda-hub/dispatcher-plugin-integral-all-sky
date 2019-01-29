@@ -136,9 +136,10 @@ class SpicasLigthtCurve(LightCurveProduct):
 
             t1=data['time'][0]
             t2=data['time'][-1]+instr_t_bin
-            n_bins=int((t2-t1)/delta_t)
+
 
             digitized_ids =np.digitize(data['time'],np.arange(t1,t2,delta_t))
+            print(digitized_ids)
             binned_data = np.zeros(np.unique(digitized_ids).size, dtype=[('rate', '<f8'), ('rate_err', '<f8'), ('time', '<f8')])
             for ID,binned_id in enumerate(np.unique(digitized_ids)):
 
