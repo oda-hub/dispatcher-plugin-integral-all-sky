@@ -119,8 +119,8 @@ class SpicasLigthtCurve(LightCurveProduct):
         data = np.zeros(len(df)-3, dtype=[('rate', '<f8'), ('rate_err', '<f8'), ('time', '<f8')])
         for ID,d in enumerate(df[2:-1]):
             t,r,_=d.split()
-            data['rate']=float(r)
-            data['time'] = float(t)
+            data['rate'][ID]=float(r)
+            data['time'][ID] = float(t)
 
         data['rate_err']=np.sqrt(data['rate'])
 
