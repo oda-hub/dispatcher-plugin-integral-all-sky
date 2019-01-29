@@ -139,7 +139,7 @@ class SpicasLigthtCurve(LightCurveProduct):
 
 
             digitized_ids =np.digitize(data['time'],np.arange(t1,t2,delta_t))
-            print(digitized_ids)
+            print(t1,t2,delta_t,data['time'][0],data['time'][1],digitized_ids)
             binned_data = np.zeros(np.unique(digitized_ids).size, dtype=[('rate', '<f8'), ('rate_err', '<f8'), ('time', '<f8')])
             for ID,binned_id in enumerate(np.unique(digitized_ids)):
 
@@ -147,7 +147,7 @@ class SpicasLigthtCurve(LightCurveProduct):
 
                 binned_data['rate'][ID] = np.sum(data['rate'][msk])
                 binned_data['time'][ID] = np.mean(data['time'][msk])
-                print(ID,binned_id,np.unique(digitized_ids), np.sum(data['rate'][msk]),np.mean(data['time'][msk]))
+                #print(ID,binned_id, np.sum(data['rate'][msk]),np.mean(data['time'][msk]))
             binned_data['rate_err'] = np.sqrt(binned_data['rate'])
 
             data=binned_data
