@@ -261,7 +261,7 @@ class SpiacsDispatcher(object):
     def _run(self,data_server_url,param_dict):
 
         try:
-            url="%s/%s"%(data_server_url)
+            url="%s"%(data_server_url)
             print ('url',url)
             res = requests.get("%s" % (url),params=param_dict)
 
