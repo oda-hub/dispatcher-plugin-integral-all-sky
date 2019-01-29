@@ -129,7 +129,7 @@ class SpicasLigthtCurve(LightCurveProduct):
             data['rate'][ID]=float(r)
             data['time'][ID] = float(t)
 
-        data['rate_err']=np.sqrt(data['rate'])
+
 
 
         if delta_t is not None and delta_t>instr_t_bin:
@@ -140,18 +140,23 @@ class SpicasLigthtCurve(LightCurveProduct):
 
             digitized_ids =np.digitize(data['time'],np.arange(t1,t2,delta_t))
             print(t1,t2,delta_t,data['time'][0],data['time'][1],digitized_ids)
+
             binned_data = np.zeros(np.unique(digitized_ids).size, dtype=[('rate', '<f8'), ('rate_err', '<f8'), ('time', '<f8')])
+            _t_frac = np.zeros(binned_data.size)
             for ID,binned_id in enumerate(np.unique(digitized_ids)):
 
                 msk=digitized_ids==binned_id
-
+                _t_frac[ID]=msk.sum()*instr_t_bin
                 binned_data['rate'][ID] = np.sum(data['rate'][msk])
                 binned_data['time'][ID] = np.mean(data['time'][msk])
-                #print(ID,binned_id, np.sum(data['rate'][msk]),np.mean(data['time'][msk]))
-            binned_data['rate_err'] = np.sqrt(binned_data['rate'])
 
+            binned_data['rate']*=_t_frac
+            binned_data['rate_err'] = np.sqrt(binned_data['rate']/_t_frac)
             data=binned_data
 
+        else:
+            data['rate'] = data['rate'] /instr_t_bin
+            data['rate_err'] = np.sqrt(data['rate']/instr_t_bin)
 
         #data['rate'] = df['rate']
         #data['rate_err'] = df['rate_err']
