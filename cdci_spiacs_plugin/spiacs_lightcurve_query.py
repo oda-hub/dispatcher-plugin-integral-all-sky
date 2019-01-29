@@ -150,7 +150,7 @@ class SpicasLigthtCurve(LightCurveProduct):
                 binned_data['rate'][ID] = np.sum(data['rate'][msk])
                 binned_data['time'][ID] = np.mean(data['time'][msk])
 
-            binned_data['rate']*=_t_frac
+            binned_data['rate']*=1.0/_t_frac
             binned_data['rate_err'] = np.sqrt(binned_data['rate']/_t_frac)
             data=binned_data
 
