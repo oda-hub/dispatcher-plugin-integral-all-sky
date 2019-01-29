@@ -87,8 +87,7 @@ class SpicasLigthtCurve(LightCurveProduct):
                              res,
                              src_name='',
                              prod_prefix='spiacs_lc',
-                             out_dir=None,
-                             delta_t=None):
+                             out_dir=None):
 
 
 
@@ -111,11 +110,16 @@ class SpicasLigthtCurve(LightCurveProduct):
 
         meta_data={}
         meta_data['src_name'] = src_name
-        meta_data['time_bin'] = delta_t
+
 
 
         #try:
         df=res.content.splitlines()
+
+        meta_data['time_bin'] = float(df[1].d.split()[1])
+
+
+
         data = np.zeros(len(df)-3, dtype=[('rate', '<f8'), ('rate_err', '<f8'), ('time', '<f8')])
         for ID,d in enumerate(df[2:-1]):
             t,r,_=d.split()
@@ -158,12 +162,14 @@ class SpiacsLightCurveQuery(LightCurveQuery):
 
     def build_product_list(self, instrument, res, out_dir, prod_prefix='spiacs_lc',api=False):
         src_name = 'query'
-        delta_t = instrument.get_par_by_name('time_bin')._astropy_time_delta.sec
+        #T1 = instrument.get_par_by_name('T1')._astropy_time
+        #T2 = instrument.get_par_by_name('T2')._astropy_time
+
+
         prod_list = SpicasLigthtCurve.build_from_res(res,
                                                       src_name=src_name,
                                                       prod_prefix=prod_prefix,
-                                                      out_dir=out_dir,
-                                                      delta_t=delta_t)
+                                                      out_dir=out_dir)
 
         # print('spectrum_list',spectrum_list)
 
@@ -180,7 +186,6 @@ class SpiacsLightCurveQuery(LightCurveQuery):
 
         delta_t=T2-T1
         T_ref=time.Time((T2.mjd + T1.mjd) * 0.5, format='mjd').isot
-        t_bin = instrument.get_par_by_name('time_bin')._astropy_time_delta.sec
         param_dict=self.set_instr_dictionaries(T_ref,delta_t.sec)
 
         print ('build here',config,instrument)
