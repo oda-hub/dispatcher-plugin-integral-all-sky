@@ -120,7 +120,7 @@ class SpicasLigthtCurve(LightCurveProduct):
         for ID,d in enumerate(df[2:-1]):
             t,r,_=d.split()
             data['rate'][ID]=float(r)
-            data['time'][ID] = float(t)
+            data['time'][ID] = float(t)/1000.
 
         data['rate_err']=np.sqrt(data['rate'])
 
@@ -157,7 +157,7 @@ class SpiacsLightCurveQuery(LightCurveQuery):
         super(SpiacsLightCurveQuery, self).__init__(name)
 
     def build_product_list(self, instrument, res, out_dir, prod_prefix='spiacs_lc',api=False):
-        src_name = 'spi_acs_lc '
+        src_name = 'lc'
         delta_t = instrument.get_par_by_name('time_bin')._astropy_time_delta.sec
         prod_list = SpicasLigthtCurve.build_from_res(res,
                                                       src_name=src_name,
@@ -174,7 +174,7 @@ class SpiacsLightCurveQuery(LightCurveQuery):
                               config=None):
 
 
-        src_name = 'spiacs_lc'
+        src_name = 'lc'
         T1=instrument.get_par_by_name('T1')._astropy_time
         T2=instrument.get_par_by_name('T2')._astropy_time
 
