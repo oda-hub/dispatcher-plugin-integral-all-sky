@@ -132,7 +132,7 @@ class SpicasLigthtCurve(LightCurveProduct):
         data['rate_err']=np.sqrt(data['rate'])
 
 
-        if delta_t is not None:
+        if delta_t is not None and delta_t<instr_t_bin:
 
             t1=data['time'][0]-instr_t_bin*0.5
             t2=data['time'][-1]+instr_t_bin*0.5
