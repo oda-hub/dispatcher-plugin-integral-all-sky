@@ -1,0 +1,7 @@
+instruments:
+  polar:
+      dispatcher_mnt_point:
+      data_server_cache:
+      dummy_cache: dummy_prods
+      data_server_url: http://isdc.unige.ch/~savchenk/spiacs-online/spiacs.pl
+      data_server_port:
