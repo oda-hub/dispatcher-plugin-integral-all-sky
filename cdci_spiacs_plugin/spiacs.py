@@ -84,7 +84,7 @@ def spiacs_factory():
 
 
     query_dictionary={}
-    query_dictionary['spi_acs_lc'] = 'spiacs_lc_query'
+    query_dictionary['spi_acs_lc'] = 'spi_acs_lc_query'
     #query_dictionary['update_image'] = 'update_image'
 
     print('--> conf_file',conf_file)
