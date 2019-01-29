@@ -137,19 +137,20 @@ class SpicasLigthtCurve(LightCurveProduct):
             t1=data['time'][0]
             t2=data['time'][-1]+instr_t_bin
             n_bins=int((t2-t1)/delta_t)
-            binned_data = np.zeros(n_bins, dtype=[('rate', '<f8'), ('rate_err', '<f8'), ('time', '<f8')])
-            digitized_ids =np.digitize(data['time'],np.linspace(t1,t2,n_bins))
+
+            digitized_ids =np.digitize(data['time'],np.arange(t1,t2,delta_t))
+            binned_data = np.zeros(np.unique(digitized_ids).size, dtype=[('rate', '<f8'), ('rate_err', '<f8'), ('time', '<f8')])
             for ID,binned_id in enumerate(np.unique(digitized_ids)):
 
                 msk=digitized_ids==binned_id
 
-                binned_data['rate'][ID] = np.sum(data['rate'][msk]*instr_t_bin)
+                binned_data['rate'][ID] = np.sum(data['rate'][msk])
                 binned_data['time'][ID] = np.mean(data['time'][msk])
 
-            binned_data['rate'][ID]*=1.0/delta_t
             binned_data['rate_err'] = np.sqrt(binned_data['rate'])
 
             data=binned_data
+
 
         #data['rate'] = df['rate']
         #data['rate_err'] = df['rate_err']
@@ -249,7 +250,7 @@ class SpiacsLightCurveQuery(LightCurveQuery):
                                                         dy=query_lc.data.data_unit[0].data['rate_err'],
                                                         title='Start Time: %s'%instrument.get_par_by_name('T1')._astropy_time.utc.value,
                                                         x_label='Time  (s)',
-                                                        y_label='Rate  (cts/s)'))
+                                                        y_label='Rate  (cts)'))
 
             if api==True:
                 _data_list.append(query_lc.data)
