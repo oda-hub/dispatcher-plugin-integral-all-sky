@@ -116,7 +116,7 @@ class SpicasLigthtCurve(LightCurveProduct):
         #try:
         df=res.content.splitlines()
 
-        meta_data['time_bin'] = float(df[1].d.split()[1])
+        meta_data['time_bin'] = float(df[1].split()[1])
 
 
 
