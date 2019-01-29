@@ -185,8 +185,9 @@ class SpiacsLightCurveQuery(LightCurveQuery):
         T2=instrument.get_par_by_name('T2')._astropy_time
 
         delta_t=T2-T1
+        delta_t=delta_t.sec*0.5
         T_ref=time.Time((T2.mjd + T1.mjd) * 0.5, format='mjd').isot
-        param_dict=self.set_instr_dictionaries(T_ref,delta_t.sec)
+        param_dict=self.set_instr_dictionaries(T_ref,delta_t)
 
         print ('build here',config,instrument)
         q = SpiacsDispatcher(instrument=instrument,config=config,param_dict=param_dict)
