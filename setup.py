@@ -31,7 +31,7 @@ print ('packs',packs)
 include_package_data=True
 
 scripts_list=glob.glob('./bin/*')
-setup(name='cdci_polar_plugin',
+setup(name='cdci_spicas_plugin',
       version=1.0,
       description='A SPIACS plugin  for CDCI online data analysis',
       author='Andrea Tramacere',
