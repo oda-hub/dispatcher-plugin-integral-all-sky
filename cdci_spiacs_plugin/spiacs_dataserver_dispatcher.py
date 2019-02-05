@@ -83,7 +83,7 @@ from contextlib import contextmanager
 
 class SpiacsAnalysisException(Exception):
 
-    def __init__(self, message='Polar analysis exception', debug_message=''):
+    def __init__(self, message='Spiacs analysis exception', debug_message=''):
         super(SpiacsAnalysisException, self).__init__(message)
         self.message=message
         self.debug_message=debug_message
@@ -92,7 +92,7 @@ class SpiacsAnalysisException(Exception):
 
 class SpiacsException(Exception):
 
-    def __init__(self, message='Polar analysis exception', debug_message=''):
+    def __init__(self, message='Spiacs analysis exception', debug_message=''):
         super(SpiacsException, self).__init__(message)
         self.message=message
         self.debug_message=debug_message
@@ -100,7 +100,7 @@ class SpiacsException(Exception):
 
 class SpiacsUnknownException(SpiacsException):
 
-    def __init__(self,message='polar unknown exception',debug_message=''):
+    def __init__(self,message='Spiacs unknown exception',debug_message=''):
         super(SpiacsUnknownException, self).__init__(message,debug_message)
 
 
@@ -249,7 +249,7 @@ class SpiacsDispatcher(object):
 
 
     def _run_test(self,t1=1482049941, t2=1482049941+100, dt=0.1, e1=10, e2=500):
-        return requests.get("http://polar-worker:8893/api/v1.0/lightcurve/",
+        return requests.get("http://put the url here!!!",
                             params=dict(
                                 time_start=t1,
                                 time_stop=t2,
@@ -267,7 +267,7 @@ class SpiacsDispatcher(object):
 
         except Exception as e:
 
-            raise SpiacsAnalysisException(message='Polar Analysis error', debug_message=e)
+            raise SpiacsAnalysisException(message='Spiacs Analysis error', debug_message=e)
 
         return res
 

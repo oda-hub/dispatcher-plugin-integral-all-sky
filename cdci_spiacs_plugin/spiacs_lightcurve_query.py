@@ -112,66 +112,77 @@ class SpicasLigthtCurve(LightCurveProduct):
         meta_data={}
         meta_data['src_name'] = src_name
 
+        df = res.content.splitlines()
+
+        if len(df) <= 2:
+            raise SpiacsAnalysisException(message='no data found for this time interval')
+
+        if len(df) > 0 and  'ZeroData' in df[0]:
+            raise SpiacsAnalysisException(message='no data found for this time interval')
 
 
-        #try:
-        df=res.content.splitlines()
-        instr_t_bin=float(df[1].split()[1])
-        if delta_t is  None:
-            meta_data['time_bin'] = instr_t_bin
-        else:
-            meta_data['time_bin']=delta_t
-
-
-        data = np.zeros(len(df)-3, dtype=[('rate', '<f8'), ('rate_err', '<f8'), ('time', '<f8')])
-        for ID,d in enumerate(df[2:-1]):
-            t,r,_=d.split()
-            data['rate'][ID]=float(r)
-            data['time'][ID] = float(t)
+        try:
 
 
 
 
-        if delta_t is not None and delta_t>instr_t_bin:
+            instr_t_bin=float(df[1].split()[1])
 
-            t1=data['time'][0]
-            t2=data['time'][-1]+instr_t_bin
-
-
-            digitized_ids =np.digitize(data['time'],np.arange(t1,t2,delta_t))
-            #print(t1,t2,delta_t,data['time'][0],data['time'][1],digitized_ids)
-
-            binned_data = np.zeros(np.unique(digitized_ids).size, dtype=[('rate', '<f8'), ('rate_err', '<f8'), ('time', '<f8')])
-            _t_frac = np.zeros(binned_data.size)
-            for ID,binned_id in enumerate(np.unique(digitized_ids)):
-
-                msk=digitized_ids==binned_id
-                _t_frac[ID]=msk.sum()*instr_t_bin
-                binned_data['rate'][ID] = np.sum(data['rate'][msk])
-                binned_data['time'][ID] = np.mean(data['time'][msk])
-
-            binned_data['rate']*=1.0/_t_frac
-            binned_data['rate_err'] = np.sqrt(binned_data['rate']/_t_frac)
-            data=binned_data
-
-        else:
-            data['rate'] = data['rate'] /instr_t_bin
-            data['rate_err'] = np.sqrt(data['rate']/instr_t_bin)
+            if delta_t is  None:
+                meta_data['time_bin'] = instr_t_bin
+            else:
+                meta_data['time_bin']=delta_t
 
 
-        npd = NumpyDataProduct(data_unit=NumpyDataUnit(data=data,
-                                                       hdu_type='table'), meta_data=meta_data)
-
-        lc = cls(name=src_name, data=npd, header=None, file_name=file_name, out_dir=out_dir,
-                 prod_prefix=prod_prefix,
-                 src_name=src_name, meta_data=meta_data)
-
-        lc_list.append(lc)
-        #except Exception as e:
+            data = np.zeros(len(df)-3, dtype=[('rate', '<f8'), ('rate_err', '<f8'), ('time', '<f8')])
+            for ID,d in enumerate(df[2:-1]):
+                t,r,_=d.split()
+                data['rate'][ID]=float(r)
+                data['time'][ID] = float(t)
 
 
 
-        #   raise SpiacsAnalysisException(message='spiacs light curve failed: %s'%e.__repr__(),debug_message=str(e))
+
+            if delta_t is not None and delta_t>instr_t_bin:
+
+                t1=data['time'][0]
+                t2=data['time'][-1]+instr_t_bin
+
+
+                digitized_ids =np.digitize(data['time'],np.arange(t1,t2,delta_t))
+                #print(t1,t2,delta_t,data['time'][0],data['time'][1],digitized_ids)
+
+                binned_data = np.zeros(np.unique(digitized_ids).size, dtype=[('rate', '<f8'), ('rate_err', '<f8'), ('time', '<f8')])
+                _t_frac = np.zeros(binned_data.size)
+                for ID,binned_id in enumerate(np.unique(digitized_ids)):
+
+                    msk=digitized_ids==binned_id
+                    _t_frac[ID]=msk.sum()*instr_t_bin
+                    binned_data['rate'][ID] = np.sum(data['rate'][msk])
+                    binned_data['time'][ID] = np.mean(data['time'][msk])
+
+                binned_data['rate']*=1.0/_t_frac
+                binned_data['rate_err'] = np.sqrt(binned_data['rate']/_t_frac)
+                data=binned_data
+
+            else:
+                data['rate'] = data['rate'] /instr_t_bin
+                data['rate_err'] = np.sqrt(data['rate']/instr_t_bin)
+
+
+            npd = NumpyDataProduct(data_unit=NumpyDataUnit(data=data,
+                                                           hdu_type='table'), meta_data=meta_data)
+
+            lc = cls(name=src_name, data=npd, header=None, file_name=file_name, out_dir=out_dir,
+                     prod_prefix=prod_prefix,
+                     src_name=src_name, meta_data=meta_data)
+
+            lc_list.append(lc)
+        except Exception as e:
+
+
+
+            raise SpiacsAnalysisException(message='spiacs light curve failed: %s'%e.__repr__(),debug_message=str(e))
 
 
 
