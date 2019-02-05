@@ -117,7 +117,7 @@ class SpicasLigthtCurve(LightCurveProduct):
         if len(df) <= 2:
             raise SpiacsAnalysisException(message='no data found for this time interval')
 
-        if len(df) > 0 and  'ZeroData' in df[0]:
+        if len(df) > 0 and  ('ZeroData' in df[0] or 'NoData' in df[0]):
             raise SpiacsAnalysisException(message='no data found for this time interval')
 
 
