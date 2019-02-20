@@ -252,7 +252,7 @@ class SpiacsLightCurveQuery(LightCurveQuery):
 
         _names = []
         _lc_path = []
-        _root_path=[]
+        #_root_path=[]
         _html_fig = []
 
         _data_list=[]
@@ -279,8 +279,8 @@ class SpiacsLightCurveQuery(LightCurveQuery):
                 #    lc.root_file_path = root_file_path
                 #except:
                 #    pass
-                _d,md=BinaryData(str(query_lc.root_file_path)).encode()
-                _binary_data_list.append(_d)
+                #_d,md=BinaryData(str(query_lc.root_file_path)).encode()
+                #_binary_data_list.append(_d)
 
         query_out = QueryOutput()
 
@@ -290,7 +290,7 @@ class SpiacsLightCurveQuery(LightCurveQuery):
         else:
             query_out.prod_dictionary['name'] = _names
             query_out.prod_dictionary['file_name'] = _lc_path
-            query_out.prod_dictionary['root_file_name'] = _root_path
+            #query_out.prod_dictionary['root_file_name'] = _root_path
             query_out.prod_dictionary['image'] =_html_fig
             query_out.prod_dictionary['download_file_name'] = 'light_curves.tar.gz'
 
