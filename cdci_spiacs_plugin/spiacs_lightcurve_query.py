@@ -126,11 +126,13 @@ class SpicasLigthtCurve(LightCurveProduct):
             h=df[0]
             print('h',h)
             date=h.split()[2].replace('\'','')
+
             #print('date',date)
             yy=date.split('/')[2]
             mm=date.split('/')[1]
             dd=date.split('/')[0]
             #print('yy,mm,dd', yy,mm,dd)
+            print( '20%s-%s-%s'%(yy,mm,dd))
             t_ref = time.Time('20%s-%s-%s'%(yy,mm,dd), format='isot')
             time_s=h.split()[2]
             t_ref = time.Time(t_ref.mjd + np.float(time_s), format='mjd')
