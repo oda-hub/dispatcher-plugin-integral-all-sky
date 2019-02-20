@@ -84,11 +84,14 @@ class SpicasLigthtCurve(LightCurveProduct):
 
     @classmethod
     def build_from_res(cls,
-                             res,
-                             src_name='',
-                             prod_prefix='spiacs_lc',
-                             out_dir=None,
-                             delta_t=None):
+                     res,
+                     src_name='',
+                     prod_prefix='spiacs_lc',
+                     out_dir=None,
+                     delta_t=None,
+                     T1_mjd=None,
+                     T2_mjd=None,
+                     T_ref_mjd=None):
 
 
 
@@ -124,7 +127,7 @@ class SpicasLigthtCurve(LightCurveProduct):
         try:
 
 
-
+            print('header',df[:3])
 
             instr_t_bin=float(df[1].split()[1])
 
@@ -134,7 +137,7 @@ class SpicasLigthtCurve(LightCurveProduct):
                 meta_data['time_bin']=delta_t
 
 
-            data = np.zeros(len(df)-3, dtype=[('rate', '<f8'), ('rate_err', '<f8'), ('time', '<f8')])
+            data = np.zeros(len(df)-3, dtype=[('RATE', '<f8'), ('ERROR', '<f8'), ('TIME', '<f8')])
             for ID,d in enumerate(df[2:-1]):
                 t,r,_=d.split()
                 data['rate'][ID]=float(r)
@@ -149,28 +152,51 @@ class SpicasLigthtCurve(LightCurveProduct):
                 t2=data['time'][-1]+instr_t_bin
 
 
-                digitized_ids =np.digitize(data['time'],np.arange(t1,t2,delta_t))
+                digitized_ids =np.digitize(data['TIME'],np.arange(t1,t2,delta_t))
                 #print(t1,t2,delta_t,data['time'][0],data['time'][1],digitized_ids)
 
-                binned_data = np.zeros(np.unique(digitized_ids).size, dtype=[('rate', '<f8'), ('rate_err', '<f8'), ('time', '<f8')])
+                binned_data = np.zeros(np.unique(digitized_ids).size, dtype=[('RATE', '<f8'), ('ERROR', '<f8'), ('TIME', '<f8')])
                 _t_frac = np.zeros(binned_data.size)
                 for ID,binned_id in enumerate(np.unique(digitized_ids)):
 
                     msk=digitized_ids==binned_id
                     _t_frac[ID]=msk.sum()*instr_t_bin
-                    binned_data['rate'][ID] = np.sum(data['rate'][msk])
-                    binned_data['time'][ID] = np.mean(data['time'][msk])
+                    binned_data['RATE'][ID] = np.sum(data['RATE'][msk])
+                    binned_data['TIME'][ID] = np.mean(data['TIME'][msk])
 
-                binned_data['rate']*=1.0/_t_frac
-                binned_data['rate_err'] = np.sqrt(binned_data['rate']/_t_frac)
+                binned_data['RATE']*=1.0/_t_frac
+                binned_data['ERROR'] = np.sqrt(binned_data['RATE']/_t_frac)
                 data=binned_data
 
             else:
-                data['rate'] = data['rate'] /instr_t_bin
-                data['rate_err'] = np.sqrt(data['rate']/instr_t_bin)
+                data['RATE'] = data['RATE'] /instr_t_bin
+                data['ERROR'] = np.sqrt(data['RATE']/instr_t_bin)
 
             header={}
-            header['EXTNAME']='RATE'
+            header['EXTNAME'] = 'RATE'
+            header['TIMESYS'] = 'TT'
+
+            if T1_mjd is not None:
+                header['TSTART'] =  T1_mjd
+
+            if T2_mjd is not None:
+                header['TSTOP'] =   T1_mjd
+
+            if T_ref_mjd is not None:
+                header['MJDREF']=T_ref_mjd
+
+            header['TELESCOP']='INTEGRAL'
+            header['INSTRUME'] = 'SPIACS'
+            header['TIMEZERO'] = 'Tstart?'
+            header[''] = ''
+            header[''] = ''
+            header[''] = ''
+            header[''] = ''
+            header[''] = ''
+
+
+
+
 
             npd = NumpyDataProduct(data_unit=NumpyDataUnit(data=data,
                                                            name='',
@@ -206,14 +232,18 @@ class SpiacsLightCurveQuery(LightCurveQuery):
 
     def build_product_list(self, instrument, res, out_dir, prod_prefix='spiacs_lc',api=False):
         src_name = 'query'
-        #T1 = instrument.get_par_by_name('T1')._astropy_time
-        #T2 = instrument.get_par_by_name('T2')._astropy_time
-        delta_t=instrument.get_par_by_name('time_bin')._astropy_time_delta.sec
 
+        T1 = instrument.get_par_by_name('T1')._astropy_time
+        T2 = instrument.get_par_by_name('T2')._astropy_time
+        delta_t=instrument.get_par_by_name('time_bin')._astropy_time_delta.sec
+        T_ref = time.Time((T2.mjd + T1.mjd) * 0.5, format='mjd').isot
         prod_list = SpicasLigthtCurve.build_from_res(res,
                                                       src_name=src_name,
                                                       prod_prefix=prod_prefix,
                                                       out_dir=out_dir,
+                                                      T1=T1.mjd,
+                                                      T2=T2.mjd,
+                                                      T_ref=T_ref,
                                                       delta_t=delta_t)
 
         # print('spectrum_list',spectrum_list)
@@ -234,7 +264,7 @@ class SpiacsLightCurveQuery(LightCurveQuery):
         T_ref=time.Time((T2.mjd + T1.mjd) * 0.5, format='mjd').isot
         param_dict=self.set_instr_dictionaries(T_ref,delta_t)
 
-        print ('build here',config,instrument)
+        #print ('build here',config,instrument)
         q = SpiacsDispatcher(instrument=instrument,config=config,param_dict=param_dict)
 
         return q
@@ -265,9 +295,9 @@ class SpiacsLightCurveQuery(LightCurveQuery):
                 _names.append(query_lc.name)
                 _lc_path.append(str(query_lc.file_path.name))
                 #x_label='MJD-%d  (days)' % mjdref,y_label='Rate  (cts/s)'
-                _html_fig.append(query_lc.get_html_draw(x=query_lc.data.data_unit[0].data['time'],
-                                                        y=query_lc.data.data_unit[0].data['rate'],
-                                                        dy=query_lc.data.data_unit[0].data['rate_err'],
+                _html_fig.append(query_lc.get_html_draw(x=query_lc.data.data_unit[0].data['TIME'],
+                                                        y=query_lc.data.data_unit[0].data['RATE'],
+                                                        dy=query_lc.data.data_unit[0].data['ERR'],
                                                         title='Start Time: %s'%instrument.get_par_by_name('T1')._astropy_time.utc.value,
                                                         x_label='Time  (s)',
                                                         y_label='Rate  (cts/s)'))
