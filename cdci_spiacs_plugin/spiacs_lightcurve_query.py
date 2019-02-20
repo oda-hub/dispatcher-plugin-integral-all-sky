@@ -125,7 +125,7 @@ class SpicasLigthtCurve(LightCurveProduct):
 
             h=df[0]
             print('h',h)
-            date=h.split()[2]
+            date=h.split()[2].strip()
             print('date',date)
             yy=date.split('/')[2]
             mm=date.split('/')[1]
