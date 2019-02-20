@@ -211,9 +211,9 @@ class SpicasLigthtCurve(LightCurveProduct):
             npd = NumpyDataProduct(data_unit=NumpyDataUnit(data=data,
                                                            name='',
                                                            data_header=header,
-                                                           hdu_type='bintable'),
-                                                           meta_data=meta_data,
-                                                           units_dict=units_dict)
+                                                           hdu_type='bintable',
+                                                           units_dict=units_dict),
+                                                           meta_data=meta_data)
 
             lc = cls(name=src_name, data=npd, header=None, file_name=file_name, out_dir=out_dir,
                      prod_prefix=prod_prefix,
