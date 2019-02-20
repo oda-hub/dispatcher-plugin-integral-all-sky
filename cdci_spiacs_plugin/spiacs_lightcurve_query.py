@@ -46,6 +46,8 @@ import  numpy as np
 import pandas as pd
 from astropy.table import Table
 from astropy import time
+from astropy import units as u
+
 from pathlib import Path
 
 from astropy.io import fits as pf
@@ -134,8 +136,10 @@ class SpicasLigthtCurve(LightCurveProduct):
             #print('yy,mm,dd', yy,mm,dd)
             print( '20%s-%s-%s'%(yy,mm,dd))
             t_ref = time.Time('20%s-%s-%sT00:00:00'%(yy,mm,dd), format='isot')
-            time_s=h.split()[3]
-            t_ref = time.Time(t_ref.mjd + np.float(time_s), format='mjd')
+
+            time_s = np.float(h.split()[3]) * u.s
+
+            t_ref = time.Time(t_ref.mjd + time_s.to('d'), format='mjd')
 
             print('date',t_ref.isot)
 
