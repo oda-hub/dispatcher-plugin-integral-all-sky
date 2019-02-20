@@ -68,9 +68,9 @@ class SpicasLigthtCurve(LightCurveProduct):
         else:
             self.meta_data = meta_data
 
-        self.meta_data['time'] = 'time'
-        self.meta_data['rate'] = 'rate'
-        self.meta_data['rate_err'] = 'rate_err'
+        self.meta_data['time'] = 'TIME'
+        self.meta_data['rate'] = 'RATE'
+        self.meta_data['rate_err'] = 'ERROR'
 
 
 
@@ -140,8 +140,8 @@ class SpicasLigthtCurve(LightCurveProduct):
             data = np.zeros(len(df)-3, dtype=[('RATE', '<f8'), ('ERROR', '<f8'), ('TIME', '<f8')])
             for ID,d in enumerate(df[2:-1]):
                 t,r,_=d.split()
-                data['rate'][ID]=float(r)
-                data['time'][ID] = float(t)
+                data['RATE'][ID]=float(r)
+                data['TIME'][ID] = float(t)
 
             if delta_t is not None:
                 delta_t=np.int(delta_t/instr_t_bin)*instr_t_bin
