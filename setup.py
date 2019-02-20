@@ -23,7 +23,7 @@ f.close()
 
 packs=find_packages()
 
-print ('packs',packs)
+print('packs',packs)
 
 
 
