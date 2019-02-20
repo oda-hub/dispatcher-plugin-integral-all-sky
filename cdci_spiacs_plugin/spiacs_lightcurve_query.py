@@ -141,7 +141,7 @@ class SpicasLigthtCurve(LightCurveProduct):
                 data['time'][ID] = float(t)
 
             if delta_t is not None:
-                delta_t=np.int(delta_t/instr_t_bin)
+                delta_t=np.int(delta_t/instr_t_bin)*instr_t_bin
 
             if delta_t is not None and delta_t>instr_t_bin:
 
