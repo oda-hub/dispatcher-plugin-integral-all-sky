@@ -138,8 +138,8 @@ class SpicasLigthtCurve(LightCurveProduct):
             t_ref = time.Time('20%s-%s-%sT00:00:00'%(yy,mm,dd), format='isot')
 
             time_s = np.float(h.split()[3]) * u.s
-
-            t_ref = time.Time(t_ref.mjd + time_s.to('d'), format='mjd')
+            print('time_s',time_s)
+            t_ref = time.Time(t_ref.mjd + time_s.to('d').value, format='mjd')
 
             print('date',t_ref.isot)
 
