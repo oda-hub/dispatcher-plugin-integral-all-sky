@@ -135,13 +135,10 @@ class SpicasLigthtCurve(LightCurveProduct):
             #print('yy,mm,dd', yy,mm,dd)
             #print( '20%s-%s-%s'%(yy,mm,dd))
             t_ref = time.Time('20%s-%s-%sT00:00:00'%(yy,mm,dd), format='isot')
-
             time_s = np.float(h.split()[3]) * u.s
-
-            #print('time_s',time_s)
             t_ref = time.Time(t_ref.mjd + time_s.to('d').value, format='mjd')
 
-            print('date',t_ref.isot)
+            #print('date',t_ref.isot)
 
             instr_t_bin=float(df[1].split()[1])
 
@@ -151,7 +148,7 @@ class SpicasLigthtCurve(LightCurveProduct):
                 meta_data['time_bin']=delta_t
 
 
-            data = np.zeros(len(df)-3, dtype=[('RATE', '<f8'), ('ERROR', '<f8'), ('TIME', '<f8')])
+            data = np.zeros(len(df)-3, dtype=[('TIME', '<f8'), ('RATE', '<f8'), ('ERROR', '<f8')])
             for ID,d in enumerate(df[2:-1]):
                 t,r,_=d.split()
                 data['RATE'][ID]=float(r)
@@ -171,7 +168,7 @@ class SpicasLigthtCurve(LightCurveProduct):
                 digitized_ids =np.digitize(data['TIME'],np.arange(t1,t2,delta_t))
                 #print(t1,t2,delta_t,data['time'][0],data['time'][1],digitized_ids)
 
-                binned_data = np.zeros(np.unique(digitized_ids).size, dtype=[('RATE', '<f8'), ('ERROR', '<f8'), ('TIME', '<f8')])
+                binned_data = np.zeros(np.unique(digitized_ids).size, dtype=[('TIME', '<f8'), ('RATE', '<f8'), ('ERROR', '<f8')])
                 _t_frac = np.zeros(binned_data.size)
                 for ID,binned_id in enumerate(np.unique(digitized_ids)):
 
@@ -204,10 +201,9 @@ class SpicasLigthtCurve(LightCurveProduct):
             header['INSTRUME'] = 'SPIACS'
             header['TIMEZERO'] = t_start
             header['TIMEUNIT'] = 's '
-            header[''] = ''
-            header[''] = ''
-            header[''] = ''
-            header[''] = ''
+            header['TUNIT1'] = 's'
+            header['TUNIT2'] = 'count/s'
+            header['TUNIT3'] = 'count/s'
 
 
 
