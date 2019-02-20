@@ -241,9 +241,9 @@ class SpiacsLightCurveQuery(LightCurveQuery):
                                                       src_name=src_name,
                                                       prod_prefix=prod_prefix,
                                                       out_dir=out_dir,
-                                                      T1=T1.mjd,
-                                                      T2=T2.mjd,
-                                                      T_ref=T_ref,
+                                                      T1_mjd=T1.mjd,
+                                                      T2_mjd=T2.mjd,
+                                                      T_ref_mjd=T_ref,
                                                       delta_t=delta_t)
 
         # print('spectrum_list',spectrum_list)
