@@ -88,10 +88,7 @@ class SpicasLigthtCurve(LightCurveProduct):
                      src_name='',
                      prod_prefix='spiacs_lc',
                      out_dir=None,
-                     delta_t=None,
-                     T1_mjd=None,
-                     T2_mjd=None,
-                     T_ref_mjd=None):
+                     delta_t=None,):
 
 
 
@@ -126,8 +123,17 @@ class SpicasLigthtCurve(LightCurveProduct):
 
         try:
 
+            h=df[0]
+            date=h.split()[1]
+            yy=date.split('/')[2]
+            mm=date.split('/')[1]
+            dd=date.split('/')[0]
 
-            print('header',df[:3])
+            t_ref = time.Time('%s-%s-%s'%(yy,mm,dd), format='isot')
+            time_s=h.split()[2]
+            t_ref = time.Time(t_ref.mjd + np.float(time_s), format='mjd')
+
+            print('date',t_ref.isot)
 
             instr_t_bin=float(df[1].split()[1])
 
