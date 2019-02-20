@@ -148,8 +148,8 @@ class SpicasLigthtCurve(LightCurveProduct):
 
             if delta_t is not None and delta_t>instr_t_bin:
 
-                t1=data['time'][0]
-                t2=data['time'][-1]+instr_t_bin
+                t1=data['TIME'][0]
+                t2=data['TIME'][-1]+instr_t_bin
 
 
                 digitized_ids =np.digitize(data['TIME'],np.arange(t1,t2,delta_t))
