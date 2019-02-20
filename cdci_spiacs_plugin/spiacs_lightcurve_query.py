@@ -134,11 +134,12 @@ class SpicasLigthtCurve(LightCurveProduct):
             mm=date.split('/')[1]
             dd=date.split('/')[0]
             #print('yy,mm,dd', yy,mm,dd)
-            print( '20%s-%s-%s'%(yy,mm,dd))
+            #print( '20%s-%s-%s'%(yy,mm,dd))
             t_ref = time.Time('20%s-%s-%sT00:00:00'%(yy,mm,dd), format='isot')
 
             time_s = np.float(h.split()[3]) * u.s
-            print('time_s',time_s)
+
+            #print('time_s',time_s)
             t_ref = time.Time(t_ref.mjd + time_s.to('d').value, format='mjd')
 
             print('date',t_ref.isot)
@@ -203,7 +204,7 @@ class SpicasLigthtCurve(LightCurveProduct):
 
             header['TELESCOP']='INTEGRAL'
             header['INSTRUME'] = 'SPIACS'
-            header['TIMEZERO'] = 'Tstart?'
+            header['TIMEZERO'] = t_ref.mjd+t_start
             header[''] = ''
             header[''] = ''
             header[''] = ''
