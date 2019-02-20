@@ -74,14 +74,12 @@ class SpicasLigthtCurve(LightCurveProduct):
         self.meta_data['rate'] = 'RATE'
         self.meta_data['rate_err'] = 'ERROR'
 
-
-
         super(LightCurveProduct, self).__init__(name=name,
-                                               data=data,
-                                               name_prefix=prod_prefix,
-                                               file_dir=out_dir,
-                                               file_name=file_name,
-                                               meta_data=meta_data)
+                                                data=data,
+                                                name_prefix=prod_prefix,
+                                                file_dir=out_dir,
+                                                file_name=file_name,
+                                                meta_data=meta_data)
 
 
     @classmethod
@@ -90,7 +88,8 @@ class SpicasLigthtCurve(LightCurveProduct):
                      src_name='',
                      prod_prefix='spiacs_lc',
                      out_dir=None,
-                     delta_t=None,):
+                     delta_t=None,
+                     integral_mjdref=51544.0):
 
 
 
@@ -194,18 +193,17 @@ class SpicasLigthtCurve(LightCurveProduct):
             header['TIMESYS'] = 'TT'
 
             #if T1_mjd is not None:
-            header['TSTART'] =  t_ref.mjd+t_start
-
-            #if T2_mjd is not None:
-            header['TSTOP'] =   t_ref.mjd+t_stop
+            delta_mjd=(t_ref.mjd-integral_mjdref)*u.d
+            header['TSTART'] = delta_mjd.to('s').value + t_start
+            header['TSTOP'] =   delta_mjd.to('s').value + t_stop
 
             #if T_ref_mjd is not None:
-            header['MJDREF']=0
+            header['MJDREF']= integral_mjdref
 
-            header['TELESCOP']='INTEGRAL'
+            header['TELESCOP']=  'INTEGRAL'
             header['INSTRUME'] = 'SPIACS'
-            header['TIMEZERO'] = t_ref.mjd+t_start
-            header[''] = ''
+            header['TIMEZERO'] = t_start
+            header['TIMEUNIT'] = 's '
             header[''] = ''
             header[''] = ''
             header[''] = ''
