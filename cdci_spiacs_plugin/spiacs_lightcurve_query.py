@@ -201,12 +201,11 @@ class SpicasLigthtCurve(LightCurveProduct):
             header['INSTRUME'] = 'SPIACS'
             header['TIMEZERO'] = t_start
             header['TIMEUNIT'] = 's '
-            header['TUNIT1'] = 's'
-            header['TUNIT2'] = 'count/s'
-            header['TUNIT3'] = 'count/s'
+            unit_dict={}
 
-
-
+            unit_dict['RATE']='count/s'
+            unit_dict['ERROR'] = 'count/s'
+            unit_dict['TIME'] = 's'
 
 
             npd = NumpyDataProduct(data_unit=NumpyDataUnit(data=data,
