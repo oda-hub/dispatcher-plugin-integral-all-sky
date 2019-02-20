@@ -212,7 +212,8 @@ class SpicasLigthtCurve(LightCurveProduct):
                                                            name='',
                                                            data_header=header,
                                                            hdu_type='bintable'),
-                                                           meta_data=meta_data)
+                                                           meta_data=meta_data,
+                                                           unit_dict=unit_dict)
 
             lc = cls(name=src_name, data=npd, header=None, file_name=file_name, out_dir=out_dir,
                      prod_prefix=prod_prefix,
