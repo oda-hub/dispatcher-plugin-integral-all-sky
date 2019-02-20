@@ -152,6 +152,8 @@ class SpicasLigthtCurve(LightCurveProduct):
             if delta_t is not None:
                 delta_t=np.int(delta_t/instr_t_bin)*instr_t_bin
 
+            t_start=data['TIME'][0]
+            t_stop = data['TIME'][-1] + instr_t_bin
             if delta_t is not None and delta_t>instr_t_bin:
 
                 t1=data['TIME'][0]
@@ -182,14 +184,14 @@ class SpicasLigthtCurve(LightCurveProduct):
             header['EXTNAME'] = 'RATE'
             header['TIMESYS'] = 'TT'
 
-            if T1_mjd is not None:
-                header['TSTART'] =  T1_mjd
+            #if T1_mjd is not None:
+            header['TSTART'] =  t_ref.mjd+t_start
 
-            if T2_mjd is not None:
-                header['TSTOP'] =   T1_mjd
+            #if T2_mjd is not None:
+            header['TSTOP'] =   t_ref.mjd+t_stop
 
-            if T_ref_mjd is not None:
-                header['MJDREF']=T_ref_mjd
+            #if T_ref_mjd is not None:
+            header['MJDREF']=0
 
             header['TELESCOP']='INTEGRAL'
             header['INSTRUME'] = 'SPIACS'
@@ -247,9 +249,6 @@ class SpiacsLightCurveQuery(LightCurveQuery):
                                                       src_name=src_name,
                                                       prod_prefix=prod_prefix,
                                                       out_dir=out_dir,
-                                                      T1_mjd=T1.mjd,
-                                                      T2_mjd=T2.mjd,
-                                                      T_ref_mjd=T_ref,
                                                       delta_t=delta_t)
 
         # print('spectrum_list',spectrum_list)
