@@ -297,7 +297,7 @@ class SpiacsLightCurveQuery(LightCurveQuery):
                 #x_label='MJD-%d  (days)' % mjdref,y_label='Rate  (cts/s)'
                 _html_fig.append(query_lc.get_html_draw(x=query_lc.data.data_unit[0].data['TIME'],
                                                         y=query_lc.data.data_unit[0].data['RATE'],
-                                                        dy=query_lc.data.data_unit[0].data['ERR'],
+                                                        dy=query_lc.data.data_unit[0].data['ERROR'],
                                                         title='Start Time: %s'%instrument.get_par_by_name('T1')._astropy_time.utc.value,
                                                         x_label='Time  (s)',
                                                         y_label='Rate  (cts/s)'))
