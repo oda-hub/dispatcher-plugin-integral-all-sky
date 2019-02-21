@@ -188,6 +188,8 @@ class SpicasLigthtCurve(LightCurveProduct):
             header={}
             header['EXTNAME'] = 'RATE'
             header['TIMESYS'] = 'TT'
+            header['TIMEREF'] = 'LOCAL'
+            header['ONTIME']  = t_stop-t_start
 
             #if T1_mjd is not None:
             delta_mjd=(t_ref.mjd-integral_mjdref)*u.d
@@ -220,6 +222,7 @@ class SpicasLigthtCurve(LightCurveProduct):
                      src_name=src_name, meta_data=meta_data)
 
             lc_list.append(lc)
+
         except Exception as e:
 
 
