@@ -190,6 +190,7 @@ class SpicasLigthtCurve(LightCurveProduct):
             header['TIMESYS'] = 'TT'
             header['TIMEREF'] = 'LOCAL'
             header['ONTIME']  = t_stop-t_start
+            header['TASSIGN'] = 'SATELLITE'
 
             #if T1_mjd is not None:
             delta_mjd=(t_ref.mjd-integral_mjdref)*u.d
