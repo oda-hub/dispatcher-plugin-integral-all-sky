@@ -211,7 +211,7 @@ class SpicasLigthtCurve(LightCurveProduct):
 
 
             npd = NumpyDataProduct(data_unit=NumpyDataUnit(data=data,
-                                                           name='',
+                                                           name='RATE',
                                                            data_header=header,
                                                            hdu_type='bintable',
                                                            units_dict=units_dict),
