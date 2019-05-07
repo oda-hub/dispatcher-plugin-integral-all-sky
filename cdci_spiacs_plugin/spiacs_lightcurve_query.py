@@ -200,7 +200,7 @@ class SpicasLigthtCurve(LightCurveProduct):
             delta_mjd=(t_ref.mjd-integral_mjdref)*u.d
             header['TSTART'] = delta_mjd.to('s').value + t_start
             header['TSTOP']  = delta_mjd.to('s').value + t_stop
-
+            print('OK1')
             header['DATE-OBS'] = t_start
             header['DATE-END'] = t_stop
             header['TIMEDEL'] = meta_data['time_bin']
@@ -216,7 +216,7 @@ class SpicasLigthtCurve(LightCurveProduct):
             units_dict['RATE']='count/s'
             units_dict['ERROR'] = 'count/s'
             units_dict['TIME'] = 's'
-
+            print('OK2')
 
             npd = NumpyDataProduct(data_unit=NumpyDataUnit(data=data,
                                                            name='RATE',
