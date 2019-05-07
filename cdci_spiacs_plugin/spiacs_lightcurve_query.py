@@ -188,6 +188,7 @@ class SpicasLigthtCurve(LightCurveProduct):
                 data['RATE'] = data['RATE'] /instr_t_bin
                 data['ERROR'] = np.sqrt(data['RATE']/instr_t_bin)
 
+            print('OK')
             header={}
             header['EXTNAME'] = 'RATE'
             header['TIMESYS'] = 'TT'
@@ -208,7 +209,7 @@ class SpicasLigthtCurve(LightCurveProduct):
 
             header['TELESCOP']=  'INTEGRAL'
             header['INSTRUME'] = 'SPIACS'
-            header['TIMEZERO'] = t_ref.to('s')
+            header['TIMEZERO'] = t_ref
             header['TIMEUNIT'] = 's '
             units_dict={}
 
