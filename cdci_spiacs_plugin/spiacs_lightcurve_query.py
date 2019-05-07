@@ -193,7 +193,7 @@ class SpicasLigthtCurve(LightCurveProduct):
             header['EXTNAME'] = 'RATE'
             header['TIMESYS'] = 'TT'
             header['TIMEREF'] = 'LOCAL'
-            header['ONTIME']  = t_stop-t_start
+            #header['ONTIME']  = t_stop-t_start
             header['TASSIGN'] = 'SATELLITE'
 
             #if T1_mjd is not None:
