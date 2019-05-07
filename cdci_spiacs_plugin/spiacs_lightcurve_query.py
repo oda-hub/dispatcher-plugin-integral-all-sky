@@ -205,11 +205,11 @@ class SpicasLigthtCurve(LightCurveProduct):
             #header['DATE-END'] = t_stop
             header['TIMEDEL'] = meta_data['time_bin']
             #if T_ref_mjd is not None:
-            header['MJDREF']= integral_mjdref
+            #header['MJDREF']= integral_mjdref
 
             header['TELESCOP']=  'INTEGRAL'
             header['INSTRUME'] = 'SPIACS'
-            header['TIMEZERO'] = t_ref
+            #header['TIMEZERO'] = t_ref
             header['TIMEUNIT'] = 's '
             units_dict={}
 
