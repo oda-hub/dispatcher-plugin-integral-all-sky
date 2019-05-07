@@ -200,8 +200,8 @@ class SpicasLigthtCurve(LightCurveProduct):
             header['TSTART'] = delta_mjd.to('s').value + t_start
             header['TSTOP']  = delta_mjd.to('s').value + t_stop
 
-            header['DATE-OBS'] = t_start.isot
-            header['DATE-END'] = t_stop.isto
+            header['DATE-OBS'] = t_start
+            header['DATE-END'] = t_stop
             header['TIMEDEL'] = meta_data['time_bin']
             #if T_ref_mjd is not None:
             header['MJDREF']= integral_mjdref
