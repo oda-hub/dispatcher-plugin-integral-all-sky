@@ -142,10 +142,7 @@ class SpicasLigthtCurve(LightCurveProduct):
 
             instr_t_bin=float(df[1].split()[1])
 
-            if delta_t is  None:
-                meta_data['time_bin'] = instr_t_bin
-            else:
-                meta_data['time_bin']=delta_t
+
 
 
             data = np.zeros(len(df)-3, dtype=[('TIME', '<f8'), ('RATE', '<f8'), ('ERROR', '<f8')])
@@ -156,6 +153,12 @@ class SpicasLigthtCurve(LightCurveProduct):
 
             if delta_t is not None:
                 delta_t=np.int(delta_t/instr_t_bin)*instr_t_bin
+
+
+            if delta_t is  None:
+                meta_data['time_bin'] = instr_t_bin
+            else:
+                meta_data['time_bin']=delta_t
 
             t_start=data['TIME'][0]
             t_stop = data['TIME'][-1] + instr_t_bin
@@ -195,14 +198,17 @@ class SpicasLigthtCurve(LightCurveProduct):
             #if T1_mjd is not None:
             delta_mjd=(t_ref.mjd-integral_mjdref)*u.d
             header['TSTART'] = delta_mjd.to('s').value + t_start
-            header['TSTOP'] =   delta_mjd.to('s').value + t_stop
+            header['TSTOP']  = delta_mjd.to('s').value + t_stop
 
+            header['DATE-OBS'] = t_start.isot
+            header['DATE-END'] = t_stop.isto
+            header['TIMEDEL'] = meta_data['time_bin']
             #if T_ref_mjd is not None:
             header['MJDREF']= integral_mjdref
 
             header['TELESCOP']=  'INTEGRAL'
             header['INSTRUME'] = 'SPIACS'
-            header['TIMEZERO'] = t_start
+            header['TIMEZERO'] = t_ref.to('s')
             header['TIMEUNIT'] = 's '
             units_dict={}
 
@@ -302,6 +308,7 @@ class SpiacsLightCurveQuery(LightCurveQuery):
         for query_lc in prod_list.prod_list:
             print('->name',query_lc.name)
 
+            query_lc.add_url_to_fits_file(instrument._current_par_dic, url=instrument.disp_conf.products_url)
             query_lc.write()
             if api == False:
                 _names.append(query_lc.name)
