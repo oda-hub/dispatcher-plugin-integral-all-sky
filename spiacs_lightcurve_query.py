@@ -134,10 +134,9 @@ class SpicasLigthtCurve(LightCurveProduct):
             dd=date.split('/')[0]
             #print('yy,mm,dd', yy,mm,dd)
             #print( '20%s-%s-%s'%(yy,mm,dd))
-
-            t_ref = time.Time('20%s-%s-%sT00:00:00'%(yy,mm,dd), format='isot',scale='tt')
+            t_ref = time.Time('20%s-%s-%sT00:00:00'%(yy,mm,dd), format='isot')
             time_s = np.float(h.split()[3]) * u.s
-            t_ref = time.Time(t_ref.mjd + time_s.to('d').value, format='mjd',scale='tt')
+            t_ref = time.Time(t_ref.mjd + time_s.to('d').value, format='mjd')
 
             #print('date',t_ref.isot)
 
@@ -189,40 +188,35 @@ class SpicasLigthtCurve(LightCurveProduct):
                 data['RATE'] = data['RATE'] /instr_t_bin
                 data['ERROR'] = np.sqrt(data['RATE']/instr_t_bin)
 
-
+            print('OK')
             header={}
             header['EXTNAME'] = 'RATE'
             header['TIMESYS'] = 'TT'
             header['TIMEREF'] = 'LOCAL'
-            header['ONTIME']  = t_stop-t_start
+            #header['ONTIME']  = t_stop-t_start
             header['TASSIGN'] = 'SATELLITE'
 
-            Integral_jd=(t_ref.mjd-integral_mjdref)*u.d
-            header['TSTART'] = Integral_jd.to('s').value + t_start
-            header['TSTOP']  = Integral_jd.to('s').value + t_stop
-
-            t1 = time.Time(t_start / 86400. + t_ref,scale='tt', format='mjd')
-            t2 = time.Time(t_start / 86400. + t_ref,scale='tt', format='mjd')
-
-            #TODO add comment  "Start time (UTC) of the light curve" now fits writer is failing
-            header['DATE-OBS'] = '%s'%t1.isot
-            # TODO add comment  "Start time (UTC) of the light curve" now fits writer is failing
-            header['DATE-END'] = '%s'%t2.isot
-
+            #if T1_mjd is not None:
+            delta_mjd=(t_ref.mjd-integral_mjdref)*u.d
+            #header['TSTART'] = delta_mjd.to('s').value + t_start
+            #header['TSTOP']  = delta_mjd.to('s').value + t_stop
+            print('OK1')
+            #header['DATE-OBS'] = t_start
+            #header['DATE-END'] = t_stop
             header['TIMEDEL'] = meta_data['time_bin']
-
-            header['MJDREF']= integral_mjdref
+            #if T_ref_mjd is not None:
+            #header['MJDREF']= integral_mjdref
 
             header['TELESCOP']=  'INTEGRAL'
             header['INSTRUME'] = 'SPIACS'
-            #print ((t_ref.value*u.d).to('s'))
-            header['TIMEZERO'] = (t_ref.value*u.d-integral_mjdref*u.d).to('s').value
+            #header['TIMEZERO'] = t_ref
             header['TIMEUNIT'] = 's '
             units_dict={}
 
             units_dict['RATE']='count/s'
             units_dict['ERROR'] = 'count/s'
             units_dict['TIME'] = 's'
+            print('OK2')
 
             npd = NumpyDataProduct(data_unit=NumpyDataUnit(data=data,
                                                            name='RATE',
