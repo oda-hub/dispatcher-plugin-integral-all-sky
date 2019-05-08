@@ -190,17 +190,18 @@ class SpicasLigthtCurve(LightCurveProduct):
 
 
             header={}
+            print('OK1')
             header['EXTNAME'] = 'RATE'
             header['TIMESYS'] = 'TT'
             header['TIMEREF'] = 'LOCAL'
             header['ONTIME']  = t_stop-t_start
             header['TASSIGN'] = 'SATELLITE'
 
-
+            print('OK2')
             delta_mjd=(t_ref.mjd-integral_mjdref)*u.d
             header['TSTART'] = delta_mjd.to('s').value + t_start
             header['TSTOP']  = delta_mjd.to('s').value + t_stop
-
+            print('OK3')
             header['DATE-OBS'] = t_start
             header['DATE-END'] = t_stop
             header['TIMEDEL'] = meta_data['time_bin']
@@ -210,13 +211,14 @@ class SpicasLigthtCurve(LightCurveProduct):
             header['TELESCOP']=  'INTEGRAL'
             header['INSTRUME'] = 'SPIACS'
             header['TIMEZERO'] = (t_ref.value*u.d).to('s')
+            print('OK4')
             header['TIMEUNIT'] = 's '
             units_dict={}
 
             units_dict['RATE']='count/s'
             units_dict['ERROR'] = 'count/s'
             units_dict['TIME'] = 's'
-            #print('OK2')
+            print('OK5')
 
             npd = NumpyDataProduct(data_unit=NumpyDataUnit(data=data,
                                                            name='RATE',
