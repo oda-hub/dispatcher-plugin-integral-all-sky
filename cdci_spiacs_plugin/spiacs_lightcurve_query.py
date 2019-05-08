@@ -203,8 +203,9 @@ class SpicasLigthtCurve(LightCurveProduct):
 
             t1 = time.Time(t_start / 86400. + t_ref,scale='tt', format='mjd')
             t2 = time.Time(t_start / 86400. + t_ref,scale='tt', format='mjd')
-            header['DATE-OBS'] = ('%s'%t1.isot, "Start time (UTC) of the light curve")
-            header['DATE-END'] = ('%s'%t2.isot, "End time (UTC) of the light curve")
+            header['DATE-OBS'] = '%s' % t1.isot
+            #header['DATE-OBS'] = ('%s'%t1.isot, "Start time (UTC) of the light curve")
+            #header['DATE-END'] = ('%s'%t2.isot, "End time (UTC) of the light curve")
             header['TIMEDEL'] = meta_data['time_bin']
 
             header['MJDREF']= integral_mjdref
