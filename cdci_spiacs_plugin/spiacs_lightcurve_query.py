@@ -134,9 +134,10 @@ class SpicasLigthtCurve(LightCurveProduct):
             dd=date.split('/')[0]
             #print('yy,mm,dd', yy,mm,dd)
             #print( '20%s-%s-%s'%(yy,mm,dd))
-            t_ref = time.Time('20%s-%s-%sT00:00:00'%(yy,mm,dd), format='isot')
+
+            t_ref = time.Time('20%s-%s-%sT00:00:00'%(yy,mm,dd), format='isot',scale='tt')
             time_s = np.float(h.split()[3]) * u.s
-            t_ref = time.Time(t_ref.mjd + time_s.to('d').value, format='mjd')
+            t_ref = time.Time(t_ref.mjd + time_s.to('d').value, format='mjd',scale='tt')
 
             #print('date',t_ref.isot)
 
@@ -196,11 +197,14 @@ class SpicasLigthtCurve(LightCurveProduct):
             header['ONTIME']  = t_stop-t_start
             header['TASSIGN'] = 'SATELLITE'
 
-            delta_mjd=(t_ref.mjd-integral_mjdref)*u.d
-            header['TSTART'] = delta_mjd.to('s').value + t_start
-            header['TSTOP']  = delta_mjd.to('s').value + t_stop
-            header['DATE-OBS'] = t_start
-            header['DATE-END'] = t_stop
+            Integral_jd=(t_ref.mjd-integral_mjdref)*u.d
+            header['TSTART'] = Integral_jd.to('s').value + t_start
+            header['TSTOP']  = Integral_jd.to('s').value + t_stop
+
+            t1 = time.Time(t_start / 86400. + t_ref,scale='tt', format='mjd')
+            t2 = time.Time(t_start / 86400. + t_ref,scale='tt', format='mjd')
+            header['DATE-OBS'] = (t1.isot, "Start time (UTC) of the light curve")
+            header['DATE-END'] = (t2.isot, "End time (UTC) of the light curve")
             header['TIMEDEL'] = meta_data['time_bin']
 
             header['MJDREF']= integral_mjdref
@@ -208,7 +212,7 @@ class SpicasLigthtCurve(LightCurveProduct):
             header['TELESCOP']=  'INTEGRAL'
             header['INSTRUME'] = 'SPIACS'
             #print ((t_ref.value*u.d).to('s'))
-            header['TIMEZERO'] = (t_ref.value*u.d).to('s').value
+            header['TIMEZERO'] = (t_ref.value*u.d-integral_mjdref*u.d).to('s').value
             header['TIMEUNIT'] = 's '
             units_dict={}
 
