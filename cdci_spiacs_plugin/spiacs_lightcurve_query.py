@@ -188,28 +188,28 @@ class SpicasLigthtCurve(LightCurveProduct):
                 data['RATE'] = data['RATE'] /instr_t_bin
                 data['ERROR'] = np.sqrt(data['RATE']/instr_t_bin)
 
-            print('OK')
+
             header={}
             header['EXTNAME'] = 'RATE'
             header['TIMESYS'] = 'TT'
             header['TIMEREF'] = 'LOCAL'
-            #header['ONTIME']  = t_stop-t_start
+            header['ONTIME']  = t_stop-t_start
             header['TASSIGN'] = 'SATELLITE'
 
-            #if T1_mjd is not None:
+
             delta_mjd=(t_ref.mjd-integral_mjdref)*u.d
-            #header['TSTART'] = delta_mjd.to('s').value + t_start
-            #header['TSTOP']  = delta_mjd.to('s').value + t_stop
-            print('OK1')
-            #header['DATE-OBS'] = t_start
-            #header['DATE-END'] = t_stop
+            header['TSTART'] = delta_mjd.to('s').value + t_start
+            header['TSTOP']  = delta_mjd.to('s').value + t_stop
+
+            header['DATE-OBS'] = t_start
+            header['DATE-END'] = t_stop
             header['TIMEDEL'] = meta_data['time_bin']
-            #if T_ref_mjd is not None:
-            #header['MJDREF']= integral_mjdref
+
+            header['MJDREF']= integral_mjdref
 
             header['TELESCOP']=  'INTEGRAL'
             header['INSTRUME'] = 'SPIACS'
-            #header['TIMEZERO'] = t_ref
+            header['TIMEZERO'] = t_ref.value*86400.
             header['TIMEUNIT'] = 's '
             units_dict={}
 
