@@ -188,35 +188,35 @@ class SpicasLigthtCurve(LightCurveProduct):
                 data['RATE'] = data['RATE'] /instr_t_bin
                 data['ERROR'] = np.sqrt(data['RATE']/instr_t_bin)
 
-
+            print('OK')
             header={}
             header['EXTNAME'] = 'RATE'
             header['TIMESYS'] = 'TT'
             header['TIMEREF'] = 'LOCAL'
-            header['ONTIME']  = t_stop-t_start
+            #header['ONTIME']  = t_stop-t_start
             header['TASSIGN'] = 'SATELLITE'
 
-
+            #if T1_mjd is not None:
             delta_mjd=(t_ref.mjd-integral_mjdref)*u.d
-            header['TSTART'] = delta_mjd.to('s').value + t_start
-            header['TSTOP']  = delta_mjd.to('s').value + t_stop
-
-            header['DATE-OBS'] = t_start
-            header['DATE-END'] = t_stop
+            #header['TSTART'] = delta_mjd.to('s').value + t_start
+            #header['TSTOP']  = delta_mjd.to('s').value + t_stop
+            print('OK1')
+            #header['DATE-OBS'] = t_start
+            #header['DATE-END'] = t_stop
             header['TIMEDEL'] = meta_data['time_bin']
-
-            header['MJDREF']= integral_mjdref
+            #if T_ref_mjd is not None:
+            #header['MJDREF']= integral_mjdref
 
             header['TELESCOP']=  'INTEGRAL'
             header['INSTRUME'] = 'SPIACS'
-            header['TIMEZERO'] = (t_ref.value*u.d).to('s')
+            #header['TIMEZERO'] = t_ref
             header['TIMEUNIT'] = 's '
             units_dict={}
 
             units_dict['RATE']='count/s'
             units_dict['ERROR'] = 'count/s'
             units_dict['TIME'] = 's'
-            #print('OK2')
+            print('OK2')
 
             npd = NumpyDataProduct(data_unit=NumpyDataUnit(data=data,
                                                            name='RATE',
