@@ -210,6 +210,7 @@ class SpicasLigthtCurve(LightCurveProduct):
 
             header['TELESCOP']=  'INTEGRAL'
             header['INSTRUME'] = 'SPIACS'
+            print ((t_ref.value*u.d).to('s'))
             #header['TIMEZERO'] = (t_ref.value*u.d).to('s')
             print('OK4')
             header['TIMEUNIT'] = 's '
