@@ -210,7 +210,7 @@ class SpicasLigthtCurve(LightCurveProduct):
 
             header['TELESCOP']=  'INTEGRAL'
             header['INSTRUME'] = 'SPIACS'
-            header['TIMEZERO'] = (t_ref.value*u.d).to('s')
+            #header['TIMEZERO'] = (t_ref.value*u.d).to('s')
             print('OK4')
             header['TIMEUNIT'] = 's '
             units_dict={}
@@ -218,7 +218,7 @@ class SpicasLigthtCurve(LightCurveProduct):
             units_dict['RATE']='count/s'
             units_dict['ERROR'] = 'count/s'
             units_dict['TIME'] = 's'
-            print('OK5')
+            print('OK5 ')
 
             npd = NumpyDataProduct(data_unit=NumpyDataUnit(data=data,
                                                            name='RATE',
