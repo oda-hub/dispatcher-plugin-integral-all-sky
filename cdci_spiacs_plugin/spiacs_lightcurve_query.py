@@ -255,7 +255,7 @@ class SpicasLigthtCurve(LightCurveProduct):
 
 
 
-        print(npd.data_unit[0].data['TIME'])
+        print('TIME',npd.data_unit[0].data['TIME'])
 
         return lc_list
 
