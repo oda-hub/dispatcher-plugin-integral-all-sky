@@ -377,7 +377,7 @@ class SpiacsLightCurveQuery(LightCurveQuery):
         res.__setattr__('content', text)
         res.__setattr__('dummy_lc', '%s/polar_query_lc.fits' % dummy_cache)
 
-        prod_list = SpiacsLightCurveQuery.build_from_res(res,
+        prod_list = SpicasLigthtCurve.build_from_res(res,
                                                     src_name='lc',
                                                     prod_prefix=prod_prefix,
                                                     out_dir=out_dir,
