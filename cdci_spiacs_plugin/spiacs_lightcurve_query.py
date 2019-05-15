@@ -255,7 +255,6 @@ class SpicasLigthtCurve(LightCurveProduct):
 
 
 
-        print('TIME',npd.data_unit[0].data['TIME'].shape,len(npd.data_unit[0].data['TIME']),npd.data_unit[0].data['TIME'][0:1024])
 
         return lc_list
 
@@ -330,9 +329,10 @@ class SpiacsLightCurveQuery(LightCurveQuery):
                 _names.append(query_lc.name)
                 _lc_path.append(str(query_lc.file_path.name))
                 #x_label='MJD-%d  (days)' % mjdref,y_label='Rate  (cts/s)'
-                _html_fig.append(query_lc.get_html_draw(x=query_lc.data.data_unit[1].data['TIME'],
-                                                        y=query_lc.data.data_unit[1].data['RATE'],
-                                                        dy=query_lc.data.data_unit[1].data['ERROR'],
+                du=query_lc.data.get_data_unit_by_name('RATE')
+                _html_fig.append(query_lc.get_html_draw(x=du.data['TIME'],
+                                                        y=du.data['RATE'],
+                                                        dy=du.data['ERROR'],
                                                         title='Start Time: %s'%instrument.get_par_by_name('T1')._astropy_time.utc.value,
                                                         x_label='Time  (s)',
                                                         y_label='Rate  (cts/s)'))
