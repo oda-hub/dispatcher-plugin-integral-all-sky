@@ -60,6 +60,12 @@ from oda_api.data_products import NumpyDataProduct,NumpyDataUnit,BinaryData
 from .spiacs_dataserver_dispatcher import SpiacsDispatcher
 from .spiacs_dataserver_dispatcher import  SpiacsAnalysisException
 
+class DummySpiacsRes(object):
+
+    def __init__(self):
+        pass
+
+
 
 class SpicasLigthtCurve(LightCurveProduct):
     def __init__(self,name,file_name,data,header,prod_prefix=None,out_dir=None,src_name=None,meta_data={}):
@@ -108,13 +114,16 @@ class SpicasLigthtCurve(LightCurveProduct):
 
 
         file_name =  src_name+'.fits'
-        print ('file name',file_name)
+        #print ('file name',file_name)
 
         meta_data={}
         meta_data['src_name'] = src_name
 
+
+
         df = res.content.splitlines()
 
+        #print(df)
         if len(df) <= 2:
             raise SpiacsAnalysisException(message='no data found for this time interval')
 
@@ -247,7 +256,6 @@ class SpicasLigthtCurve(LightCurveProduct):
 
 
 
-
         return lc_list
 
 
@@ -321,9 +329,10 @@ class SpiacsLightCurveQuery(LightCurveQuery):
                 _names.append(query_lc.name)
                 _lc_path.append(str(query_lc.file_path.name))
                 #x_label='MJD-%d  (days)' % mjdref,y_label='Rate  (cts/s)'
-                _html_fig.append(query_lc.get_html_draw(x=query_lc.data.data_unit[0].data['TIME'],
-                                                        y=query_lc.data.data_unit[0].data['RATE'],
-                                                        dy=query_lc.data.data_unit[0].data['ERROR'],
+                du=query_lc.data.get_data_unit_by_name('RATE')
+                _html_fig.append(query_lc.get_html_draw(x=du.data['TIME'],
+                                                        y=du.data['RATE'],
+                                                        dy=du.data['ERROR'],
                                                         title='Start Time: %s'%instrument.get_par_by_name('T1')._astropy_time.utc.value,
                                                         x_label='Time  (s)',
                                                         y_label='Rate  (cts/s)'))
@@ -355,33 +364,28 @@ class SpiacsLightCurveQuery(LightCurveQuery):
 
         return query_out
 
-    def get_dummy_products(self, instrument, config, out_dir='./'):
-        raise RuntimeError('method to implement')
 
-        # src_name = instrument.get_par_by_name('src_name').value
+    def get_dummy_products(self, instrument, config, out_dir='./', prod_prefix='spiacs', api=False):
+        # print('config',config)
+        meta_data = {'product': 'light_curve', 'instrument': 'isgri', 'src_name': ''}
+        meta_data['query_parameters'] = self.get_parameters_list_as_json()
+
+        dummy_cache = config.dummy_cache
+
+        res = DummySpiacsRes()
+        with open('%s/query_spiacs_lc.txt' % dummy_cache, 'r') as file:
+            text = str(file.read())
+        res.__setattr__('content', text)
+        #res.__setattr__('dummy_lc', '%s/polar_query_lc.fits' % dummy_cache)
+
+        prod_list = SpicasLigthtCurve.build_from_res(res,
+                                                    src_name='lc',
+                                                    prod_prefix=prod_prefix,
+                                                    out_dir=out_dir)
+
+        prod_list = QueryProductList(prod_list=prod_list)
         #
-        # dummy_cache = config.dummy_cache
-        # delta_t = instrument.get_par_by_name('time_bin')._astropy_time_delta.sec
-        # print('delta_t is sec', delta_t)
-        # query_lc = LightCurveProduct.from_fits_file(inf_file='%s/query_lc.fits' % dummy_cache,
-        #                                             out_file_name='query_lc.fits',
-        #                                             prod_name='isgri_lc',
-        #                                             ext=1,
-        #                                             file_dir=out_dir)
-        # print('name', query_lc.header['NAME'])
-        # query_lc.name=query_lc.header['NAME']
-        # #if src_name is not None:
-        # #    if query_lc.header['NAME'] != src_name:
-        # #        query_lc.data = None
-        #
-        # prod_list = QueryProductList(prod_list=[query_lc])
-        #
-        # return prod_list
-
-
-
-
-
+        return prod_list
 
 
 
