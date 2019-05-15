@@ -123,6 +123,7 @@ class SpicasLigthtCurve(LightCurveProduct):
 
         df = res.content.splitlines()
 
+        print(df)
         if len(df) <= 2:
             raise SpiacsAnalysisException(message='no data found for this time interval')
 
@@ -375,7 +376,7 @@ class SpiacsLightCurveQuery(LightCurveQuery):
         with open('%s/query_spiacs_lc.txt' % dummy_cache, 'r') as file:
             text = file.read()
         res.__setattr__('content', text)
-        res.__setattr__('dummy_lc', '%s/polar_query_lc.fits' % dummy_cache)
+        #res.__setattr__('dummy_lc', '%s/polar_query_lc.fits' % dummy_cache)
 
         prod_list = SpicasLigthtCurve.build_from_res(res,
                                                     src_name='lc',
