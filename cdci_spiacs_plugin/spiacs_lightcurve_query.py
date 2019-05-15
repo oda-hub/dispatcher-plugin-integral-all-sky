@@ -119,9 +119,7 @@ class SpicasLigthtCurve(LightCurveProduct):
         meta_data={}
         meta_data['src_name'] = src_name
 
-        f=open('text.pl','w')
-        f.writelines(res.content.decode('utf-8'))
-        f.close()
+
 
         df = res.content.splitlines()
 
@@ -374,9 +372,10 @@ class SpiacsLightCurveQuery(LightCurveQuery):
         dummy_cache = config.dummy_cache
 
         res = DummySpiacsRes()
-        text=None
+        with open('%s/query_spiacs_lc.txt' % dummy_cache, 'r') as file:
+            text = file.read()
         res.__setattr__('content', text)
-
+        res.__setattr__('dummy_lc', '%s/polar_query_lc.fits' % dummy_cache)
 
         prod_list = SpiacsLightCurveQuery.build_from_res(res,
                                                     src_name='lc',
