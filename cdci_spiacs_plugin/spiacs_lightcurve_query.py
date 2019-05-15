@@ -380,8 +380,7 @@ class SpiacsLightCurveQuery(LightCurveQuery):
         prod_list = SpicasLigthtCurve.build_from_res(res,
                                                     src_name='lc',
                                                     prod_prefix=prod_prefix,
-                                                    out_dir=out_dir,
-                                                    skip_root=True)
+                                                    out_dir=out_dir)
 
         prod_list = QueryProductList(prod_list=prod_list)
         #
