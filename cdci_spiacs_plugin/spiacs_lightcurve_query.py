@@ -321,7 +321,7 @@ class SpiacsLightCurveQuery(LightCurveQuery):
         _data_list=[]
         _binary_data_list=[]
         for query_lc in prod_list.prod_list:
-            print('->name',query_lc.name)
+            #print('->name',query_lc.name)
 
             query_lc.add_url_to_fits_file(instrument._current_par_dic, url=instrument.disp_conf.products_url)
             query_lc.write()
