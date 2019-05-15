@@ -374,7 +374,7 @@ class SpiacsLightCurveQuery(LightCurveQuery):
 
         res = DummySpiacsRes()
         with open('%s/query_spiacs_lc.txt' % dummy_cache, 'r') as file:
-            text = file.read()
+            text = str(file.read())
         res.__setattr__('content', text)
         #res.__setattr__('dummy_lc', '%s/polar_query_lc.fits' % dummy_cache)
 
