@@ -123,7 +123,7 @@ class SpicasLigthtCurve(LightCurveProduct):
 
         df = res.content.splitlines()
 
-        print(df)
+        #print(df)
         if len(df) <= 2:
             raise SpiacsAnalysisException(message='no data found for this time interval')
 
