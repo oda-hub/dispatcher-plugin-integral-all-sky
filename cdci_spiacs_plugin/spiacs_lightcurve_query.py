@@ -114,7 +114,7 @@ class SpicasLigthtCurve(LightCurveProduct):
 
 
         file_name =  src_name+'.fits'
-        print ('file name',file_name)
+        #print ('file name',file_name)
 
         meta_data={}
         meta_data['src_name'] = src_name
@@ -255,7 +255,7 @@ class SpicasLigthtCurve(LightCurveProduct):
 
 
 
-
+        print(npd.data['TIME'])
 
         return lc_list
 
