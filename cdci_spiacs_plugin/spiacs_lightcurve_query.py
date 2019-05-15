@@ -120,9 +120,9 @@ class SpicasLigthtCurve(LightCurveProduct):
         meta_data['src_name'] = src_name
 
         f=open('text.pl','w')
-        f.writelines(res.content)
+        f.writelines(res.content.decode('utf-8'))
         f.close()
-        
+
         df = res.content.splitlines()
 
         if len(df) <= 2:
