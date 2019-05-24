@@ -211,8 +211,8 @@ class SpicasLigthtCurve(LightCurveProduct):
             header['TSTART'] = Integral_jd.to('s').value + t_start
             header['TSTOP']  = Integral_jd.to('s').value + t_stop
 
-            t1 = time.Time(t_start / 86400. + t_ref,scale='tt', format='mjd')
-            t2 = time.Time(t_start / 86400. + t_ref,scale='tt', format='mjd')
+            t1 = time.Time(t_start / 86400. + t_ref.value, scale='tt', format='mjd')
+            t2 = time.Time(t_start / 86400. + t_ref.value, scale='tt', format='mjd')
 
             #TODO add comment  "Start time (UTC) of the light curve" now fits writer is failing
             header['DATE-OBS'] = '%s'%t1.isot
