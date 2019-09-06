@@ -38,7 +38,7 @@ import os
 # relative import eg: from .mod import f
 
 
-import ddosaclient as dc
+#import ddosaclient as dc
 
 # Project
 # relative import eg: from .mod import f
@@ -122,7 +122,7 @@ class SpicasLigthtCurve(LightCurveProduct):
 
 
 
-        df = res.content.splitlines()
+        df = res.text.splitlines()
 
         #print(df)
         if len(df) <= 2:
@@ -161,6 +161,8 @@ class SpicasLigthtCurve(LightCurveProduct):
                 t,r,_=d.split()
                 data['RATE'][ID]=float(r)
                 data['TIME'][ID] = float(t)
+
+            print ( "Check NAN : ", (np.isnan(data['RATE'])).sum() )
 
             if delta_t is not None:
                 delta_t=np.int(delta_t/instr_t_bin)*instr_t_bin
