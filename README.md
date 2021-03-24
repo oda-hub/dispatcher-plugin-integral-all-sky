@@ -1,6 +1,6 @@
 dispatcher-plugin-integral-hk
 ==========================================
-*INTEGRAL HK Data plugin for cdci_data_analysis*
+*INTEGRAL HK Data plugin for https://github.com/oda-hub/dispatcher-app/*
 
 What's the license?
 -------------------
