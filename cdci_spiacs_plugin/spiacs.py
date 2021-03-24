@@ -70,7 +70,7 @@ def spiacs_factory():
     instr_query=InstrumentQuery(
         name='spiacs_parameters',
         extra_parameters_list=instr_query_pars,
-        input_prod_list_name=[],
+        input_prod_list_name=None,
         input_prod_value=None,
         catalog=None,
         catalog_name='user_catalog')
