@@ -23,7 +23,7 @@ from __future__ import absolute_import, division, print_function
 from builtins import (bytes, str, open, super, range,
                       zip, round, input, int, pow, object, map, zip)
 
-__author__ = "Andrea Tramacere"
+__author__ = "Volodymyr Savchenko, Andrea Tramacere"
 
 # Standard library
 # eg copy
@@ -37,8 +37,7 @@ import json
 
 # Project
 # relative import eg: from .mod import f
-import  logging
-import  simple_logger
+import logging
 from cdci_spiacs_plugin import conf_file as plugin_conf_file
 from cdci_data_analysis.configurer import DataServerConf
 from cdci_data_analysis.analysis.queries import  *
@@ -52,34 +51,8 @@ from ast import literal_eval
 import os
 from contextlib import contextmanager
 
-# @contextmanager
-# def silence_stdout():
-#     new_target = open(os.devnull, "w")
-#     old_target, sys.stdout = sys.stdout, new_target
-#     try:
-#         yield new_target
-#     finally:
-#         sys.stdout = old_target
-#
-#
-#
-# def redirect_out(path):
-#     #print "Redirecting stdout"
-#     sys.stdout.flush() # <--- important when redirecting to files
-#     newstdout = os.dup(1)
-#     devnull = os.open('%s/SED.log'%path, os.O_CREAT)
-#     os.dup2(devnull, 1)
-#     os.close(devnull)
-#     sys.stdout = os.fdopen(newstdout, 'w')
 
-#def view_traceback():
-#    ex_type, ex, tb = sys.exc_info()
-#    traceback.print_tb(tb)
-#    del tb
-
-
-
-
+logger = logging.getLogger(__name__)
 
 class SpiacsAnalysisException(Exception):
 
@@ -111,8 +84,8 @@ class SpiacsDispatcher(object):
     def __init__(self,config=None,param_dict=None,instrument=None):
         print('--> building class SpiacsDispatcher',instrument,config)
 
-        simple_logger.log()
-        simple_logger.logger.setLevel(logging.ERROR)
+        
+        logger.setLevel(logging.ERROR)
 
 
 
@@ -287,15 +260,11 @@ class SpiacsDispatcher(object):
 
 
 
-        try:
-
-            simple_logger.logger.setLevel(logging.ERROR)
-
-
-            print('--Spiacs disp--')
-            print('call_back_url',call_back_url)
-            print('data_server_url', self.data_server_url)
-            print('*** run_asynch', run_asynch)
+        try:            
+            logger.info('--Spiacs disp--')
+            logger.info('call_back_url',call_back_url)
+            logger.info('data_server_url', self.data_server_url)
+            logger.info('*** run_asynch', run_asynch)
 
             res =self._run(self.data_server_url,param_dict)
             #res =self._run_test()
