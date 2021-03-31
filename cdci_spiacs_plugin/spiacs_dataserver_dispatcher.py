@@ -190,14 +190,10 @@ class SpiacsDispatcher(object):
         query_out = QueryOutput()
 
 
-        message='connection OK'
+        message = 'connection OK'
         debug_message = ''
-        busy_exception=False
-
-
-        connection_status_message = 'OK'
-        query_out.set_done(message='connection OK', debug_message=str(debug_message))
-
+        
+        query_out.set_done(message=message, debug_message=str(debug_message))
 
         print('--> end test busy')
 
