@@ -308,6 +308,7 @@ class SpiacsLightCurveQuery(LightCurveQuery):
         for query_lc in prod_list.prod_list:
             # print('->name',query_lc.name)
 
+            # TODO: why is _current_par_dic only used here? Does base dispatcher need to support this?
             query_lc.add_url_to_fits_file(
                 instrument._current_par_dic, url=instrument.disp_conf.products_url)
             query_lc.write()
