@@ -31,14 +31,16 @@ print('packs',packs)
 include_package_data=True
 
 scripts_list=glob.glob('./bin/*')
-setup(name='cdci_spiacs_plugin',
+setup(name='dispatcher-plugin-integral-all-sky',
       version=1.0,
-      description='A SPIACS plugin  for CDCI online data analysis',
+      description='A plugin for online data analysis',
       author='Andrea Tramacere',
       author_email='andrea.tramacere@unige.ch',
       scripts=scripts_list,
       packages=packs,
-      package_data={'cdci_spiacs_plugin':['config_dir/*']},
+      package_data={
+          'dispatcher_plugin_integral_all_sky': ['config_dir/*']
+          },
       include_package_data=True,
       install_requires=install_req,
 )

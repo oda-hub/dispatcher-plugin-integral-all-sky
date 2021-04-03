@@ -1,3 +1,2 @@
-cdci_data_analysis
 pandas
 astropy
