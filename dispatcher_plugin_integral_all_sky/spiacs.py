@@ -35,7 +35,7 @@ __author__ = "Andrea Tramacere"
 # relative import eg: from .mod import f
 
 
-from cdci_spiacs_plugin import conf_file,conf_dir
+from . import conf_file, conf_dir
 
 from cdci_data_analysis.analysis.queries import  *
 from cdci_data_analysis.analysis.instrument import Instrument
