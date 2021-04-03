@@ -3,5 +3,4 @@ instruments:
       dispatcher_mnt_point:
       data_server_cache:
       dummy_cache: dummy_prods
-      data_server_url: http://isdc.unige.ch/~savchenk/spiacs-online/spiacs.pl
-      data_server_port:
+      data_server_url: https://www.astro.unige.ch/cdci/astrooda/dispatch-data/gw/integralhk/api/v1.0/genlc/ACS/{t0_isot}/{dt_s}
