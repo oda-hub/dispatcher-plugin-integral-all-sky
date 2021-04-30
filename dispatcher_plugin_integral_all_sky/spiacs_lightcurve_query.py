@@ -353,14 +353,8 @@ class SpiacsLightCurveQuery(LightCurveQuery):
 
     def get_dummy_products(self, instrument, config, out_dir='./', prod_prefix='spiacs', api=False):
         # print('config',config)
-        config = DataServerConf(data_server_url=instrument.data_server_conf_dict['data_server_url'],
-                                data_server_port=instrument.data_server_conf_dict['data_server_port'],
-                                data_server_remote_cache=instrument.data_server_conf_dict[
-                                    'data_server_cache'],
-                                dispatcher_mnt_point=instrument.data_server_conf_dict[
-                                    'dispatcher_mnt_point'],
-                                dummy_cache=instrument.data_server_conf_dict['dummy_cache'])
-
+        config = DataServerConf.from_conf_dict(instrument.data_server_conf_dict)
+        
         meta_data = {'product': 'light_curve',
                      'instrument': 'isgri', 'src_name': ''}
         meta_data['query_parameters'] = self.get_parameters_list_as_json()
