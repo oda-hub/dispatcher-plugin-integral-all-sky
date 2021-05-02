@@ -44,7 +44,6 @@ import io
 # Project
 # relative import eg: from .mod import f
 import numpy as np
-import pandas as pd
 from astropy.table import Table
 from astropy import time
 from astropy import units as u
@@ -206,7 +205,7 @@ class SpicasLigthtCurve(LightCurveProduct):
             header['ONTIME'] = t_stop-t_start
             header['TASSIGN'] = 'SATELLITE'
 
-            Integral_jd = (t_ref.mjd-integral_mjdref)*u.d
+            Integral_jd = (t_ref.mjd-integral_mjdref)*u.day
             header['TSTART'] = Integral_jd.to('s').value + t_start
             header['TSTOP'] = Integral_jd.to('s').value + t_stop
 
