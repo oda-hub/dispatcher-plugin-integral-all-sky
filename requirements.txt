@@ -1,2 +1,4 @@
-pandas
+cdci_data_analysis
 astropy
+simple_logger
+numpy

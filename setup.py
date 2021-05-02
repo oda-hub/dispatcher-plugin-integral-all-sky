@@ -1,5 +1,6 @@
 
 from __future__ import absolute_import, division, print_function
+import glob
 
 from builtins import (bytes, str, open, super, range,
                       zip, round, input, int, pow, object, map, zip)
@@ -7,30 +8,33 @@ from builtins import (bytes, str, open, super, range,
 __author__ = 'andrea tramacere'
 
 
-
-
 #!/usr/bin/env python
 
 from setuptools import setup, find_packages
-import  glob
+import glob
 
 
+install_req = [
+    'cdci_data_analysis',
+    'astropy',
+    'simple_logger',
+    'numpy'
+]
 
-f = open("./requirements.txt",'r')
-install_req=f.readlines()
-f.close()
+test_req = [
+    'pytest',
+    'pytest-depends',
+]
 
 
-packs=find_packages()
+packs = find_packages()
 
-print('packs',packs)
-
-
+print('packs', packs)
 
 
-include_package_data=True
+include_package_data = True
 
-scripts_list=glob.glob('./bin/*')
+scripts_list = glob.glob('./bin/*')
 setup(name='dispatcher-plugin-integral-all-sky',
       version=1.0,
       description='A plugin for online data analysis',
@@ -40,10 +44,10 @@ setup(name='dispatcher-plugin-integral-all-sky',
       packages=packs,
       package_data={
           'dispatcher_plugin_integral_all_sky': ['config_dir/*']
-          },
+      },
       include_package_data=True,
       install_requires=install_req,
-)
-
-
-
+      extras_require={
+          'test': test_req
+      }
+      )

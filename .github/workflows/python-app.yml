@@ -1,0 +1,56 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Python application
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest mypy pylint coverage
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install -e .[test]
+
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics || echo "failed lint"
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics || echo "failed second lint"
+
+    - name: PyLint - more lint
+      run: |
+        pylint -E dispatcher_plugin_integral_all_sky || echo 'this is fine!'
+
+    - name: MyPy
+      run: |
+        mypy dispatcher_plugin_integral_all_sky --ignore-missing-imports || echo 'this is fine too!'
+
+    - name: Test with pytest
+      run: |
+        python -m coverage run --source=dispatcher_plugin_integral_all_sky -m pytest tests -sv --full-trace --log-cli-level=DEBUG
+
+    # I wonder how this interacts with the Github App. But this is not only for PR. Also this does not always work
+    - name: Codecov
+      uses: codecov/codecov-action@v1.3.1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        verbose: true
