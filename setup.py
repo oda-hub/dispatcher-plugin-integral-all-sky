@@ -15,7 +15,6 @@ import glob
 
 
 install_req = [
-    'cdci_data_analysis',
     'astropy',
     'simple_logger',
     'numpy'
