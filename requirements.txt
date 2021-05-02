@@ -2,3 +2,4 @@ cdci_data_analysis
 astropy
 simple_logger
 numpy
+oda_api>=1.1.7
