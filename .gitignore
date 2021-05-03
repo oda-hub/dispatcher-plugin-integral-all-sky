@@ -21,3 +21,5 @@ lib64
 /run_tests
 /diagrams
 *.gpg
+scratch_*
+.vscode

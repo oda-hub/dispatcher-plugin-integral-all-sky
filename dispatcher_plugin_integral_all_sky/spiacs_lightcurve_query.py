@@ -44,7 +44,6 @@ import io
 # Project
 # relative import eg: from .mod import f
 import numpy as np
-import pandas as pd
 from astropy.table import Table
 from astropy import time
 from astropy import units as u
@@ -87,12 +86,12 @@ class SpicasLigthtCurve(LightCurveProduct):
         self.meta_data['rate'] = 'RATE'
         self.meta_data['rate_err'] = 'ERROR'
 
-        super(LightCurveProduct, self).__init__(name=name,
-                                                data=data,
-                                                name_prefix=prod_prefix,
-                                                file_dir=out_dir,
-                                                file_name=file_name,
-                                                meta_data=meta_data)
+        super().__init__(name=name,
+                         data=data,
+                         name_prefix=prod_prefix,
+                         file_dir=out_dir,
+                         file_name=file_name,
+                         meta_data=meta_data)
 
     @classmethod
     def build_from_res(cls,
@@ -117,45 +116,54 @@ class SpicasLigthtCurve(LightCurveProduct):
         meta_data['src_name'] = src_name
 
         res_text_stripped = res.text.replace(r"\n", "\n").strip('" \n\\n')
-        
+
         for keyword in 'ZeroData', 'NoData':
             if keyword in res_text_stripped:
                 raise SpiacsAnalysisException(
-                    message = f'no usable data found for this time interval: server reports {keyword} (status {res.status_code}). Raw response: {res.text}')
+                    message=f'no usable data found for this time interval: server reports {keyword} (status {res.status_code}). Raw response: {res.text}')
 
         try:
-            #[IJD] [seconds since reference] [counts in bin] [seconds since midnight]
+            # [IJD] [seconds since reference] [counts in bin] [seconds since midnight]
 
-            data = np.genfromtxt(                
-                    io.StringIO(res_text_stripped),
-                    delimiter=" ",
-                    usecols=[0, 2],
-                    dtype=[('TIME_IJD', '<f8'), ('COUNTS', '<f8')])
+            #print(f"\033[31m{res_text_stripped}\033[0m")
+            #open("res.txt", "w").write(res_text_stripped)
 
+            data = np.genfromtxt(
+                io.StringIO(res_text_stripped),
+                delimiter=" ",
+                usecols=[0, 2],
+                dtype=[('TIME_IJD', '<f8'), ('COUNTS', '<f8')])
+
+            assert len(data['TIME_IJD']) > 100            
+            
             dt_s = (data['TIME_IJD'][1:] - data['TIME_IJD'][:-1]) * 24 * 3600
 
-            unique_dt_s, unique_dt_s_counts = np.unique(np.round(dt_s, 3), return_counts=True)
+            unique_dt_s, unique_dt_s_counts = np.unique(
+                np.round(dt_s, 3), return_counts=True)
             i = np.argmax(unique_dt_s_counts)
             instr_t_bin = unique_dt_s[i]
 
-            logging.info("deduced instr_t_bin: %s, fraction %s", instr_t_bin, unique_dt_s_counts[i]/len(dt_s))
-                    
+            logging.info("deduced instr_t_bin: %s, fraction %s",
+                         instr_t_bin, unique_dt_s_counts[i]/len(dt_s))
+
             t_ref = time.Time(
-                (data['TIME_IJD'][0] + data['TIME_IJD'][-1])/2 + integral_mjdref, 
+                (data['TIME_IJD'][0] + data['TIME_IJD'][-1]) /
+                2 + integral_mjdref,
                 format='mjd')
 
             # IJD offset from MJD, https://heasarc.gsfc.nasa.gov/W3Browse/integral/intscw.html
-            data = np.array(list(zip(data['TIME_IJD'] - t_ref.mjd + integral_mjdref,
+            data = np.array(list(zip((data['TIME_IJD'] - t_ref.mjd + integral_mjdref) * 24 * 3600,
                                      data['COUNTS'] / instr_t_bin)),
                             dtype=[('TIME', float),
                                    ('RATE', float)]
-                        )
-        
+                            )
+
             logger.error("\033[31m got time column: %s\033[0m", data['TIME'])
-            
-            
+
             if delta_t is not None:
                 delta_t = np.int(delta_t/instr_t_bin)*instr_t_bin
+
+            logger.error("\033[31m got delta_t %s, instr_t_bin %s\033[0m", delta_t, instr_t_bin)
 
             if delta_t is None:
                 meta_data['time_bin'] = instr_t_bin
@@ -170,7 +178,7 @@ class SpicasLigthtCurve(LightCurveProduct):
                 t2 = data['TIME'][-1] + instr_t_bin
 
                 digitized_ids = np.digitize(
-                    data['TIME'], np.arange(t1, t2, delta_t))                
+                    data['TIME'], np.arange(t1, t2, delta_t))
 
                 binned_data = np.zeros(np.unique(digitized_ids).size, dtype=[
                                        ('TIME', '<f8'), ('RATE', '<f8'), ('ERROR', '<f8')])
@@ -197,7 +205,7 @@ class SpicasLigthtCurve(LightCurveProduct):
             header['ONTIME'] = t_stop-t_start
             header['TASSIGN'] = 'SATELLITE'
 
-            Integral_jd = (t_ref.mjd-integral_mjdref)*u.d
+            Integral_jd = (t_ref.mjd-integral_mjdref)*u.day
             header['TSTART'] = Integral_jd.to('s').value + t_start
             header['TSTOP'] = Integral_jd.to('s').value + t_stop
 
@@ -216,7 +224,7 @@ class SpicasLigthtCurve(LightCurveProduct):
             header['MJDREF'] = integral_mjdref
 
             header['TELESCOP'] = 'INTEGRAL'
-            header['INSTRUME'] = 'SPIACS'
+            header['INSTRUME'] = 'SPI-ACS'
             #print ((t_ref.value*u.d).to('s'))
             header['TIMEZERO'] = (
                 t_ref.value*u.d-integral_mjdref*u.d).to('s').value
@@ -285,7 +293,7 @@ class SpiacsLightCurveQuery(LightCurveQuery):
         param_dict = self.set_instr_dictionaries(T_ref, delta_t)
 
         q = SpiacsDispatcher(instrument=instrument,
-                             config=config, 
+                             config=config,
                              param_dict=param_dict)
 
         return q
@@ -353,8 +361,9 @@ class SpiacsLightCurveQuery(LightCurveQuery):
 
     def get_dummy_products(self, instrument, config, out_dir='./', prod_prefix='spiacs', api=False):
         # print('config',config)
-        config = DataServerConf.from_conf_dict(instrument.data_server_conf_dict)
-        
+        config = DataServerConf.from_conf_dict(
+            instrument.data_server_conf_dict)
+
         meta_data = {'product': 'light_curve',
                      'instrument': 'isgri', 'src_name': ''}
         meta_data['query_parameters'] = self.get_parameters_list_as_json()
