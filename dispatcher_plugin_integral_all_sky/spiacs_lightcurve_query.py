@@ -287,10 +287,10 @@ class SpiacsLightCurveQuery(LightCurveQuery):
         T1 = instrument.get_par_by_name('T1')._astropy_time
         T2 = instrument.get_par_by_name('T2')._astropy_time
 
-        delta_t = T2-T1
-        delta_t = delta_t.sec*0.5
+        delta_t = T2 - T1
+        delta_t_s = delta_t.sec * 0.5
         T_ref = time.Time((T2.mjd + T1.mjd) * 0.5, format='mjd').isot
-        param_dict = self.set_instr_dictionaries(T_ref, delta_t)
+        param_dict = self.set_instr_dictionaries(T_ref, delta_t_s)
 
         q = SpiacsDispatcher(instrument=instrument,
                              config=config,
@@ -298,10 +298,10 @@ class SpiacsLightCurveQuery(LightCurveQuery):
 
         return q
 
-    def set_instr_dictionaries(self, T_ref, delta_t):
+    def set_instr_dictionaries(self, T_ref, delta_t_s):
         return dict(
             t0_isot=T_ref,
-            dt_s=delta_t,
+            dt_s=delta_t_s,
         )
 
     def process_product_method(self, instrument, prod_list, api=False):

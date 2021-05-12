@@ -27,6 +27,7 @@ def test_discover_plugin():
     assert 'dispatcher_plugin_integral_all_sky' in importer.cdci_plugins_dict.keys()
 
 
+
 def test_default(dispatcher_live_fixture):
     server = dispatcher_live_fixture
 
@@ -81,3 +82,26 @@ def test_odaapi_data(dispatcher_live_fixture):
 
     assert len(data) > 100
     assert len(data_public) > 100
+
+
+def test_request_too_large(dispatcher_live_fixture):
+    server = dispatcher_live_fixture
+
+    logger.info("constructed server: %s", server)
+    c = requests.get(server + "/run_analysis",
+                     params={
+                         **default_parameters,
+                         'T2': '2004-03-16T00:03:15.0',
+                         'query_status': 'new',                         
+                         'query_type': 'Real'
+                         }
+    )
+
+    logger.info("content: %s", c.text)
+    jdata = c.json()
+    logger.info(json.dumps(jdata, indent=4, sort_keys=True))
+    logger.info(jdata)
+    assert c.status_code == 200
+
+    assert jdata['job_status'] == 'failed'
+    assert 'SPI-ACS backend refuses to process this request' in jdata['exit_status']['error_message']
