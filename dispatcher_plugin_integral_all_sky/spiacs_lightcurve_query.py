@@ -153,12 +153,17 @@ class SpicasLigthtCurve(LightCurveProduct):
 
             # IJD offset from MJD, https://heasarc.gsfc.nasa.gov/W3Browse/integral/intscw.html
             data = np.array(list(zip((data['TIME_IJD'] - t_ref.mjd + integral_mjdref) * 24 * 3600,
-                                     data['COUNTS'] / instr_t_bin)),
+                                     data['COUNTS'] / instr_t_bin,
+                                     data['COUNTS'] ** 0.5 / instr_t_bin
+                                     )),
                             dtype=[('TIME', float),
-                                   ('RATE', float)]
+                                   ('RATE', float),
+                                   ('ERROR', float)]
                             )
 
-            logger.error("\033[31m got time column: %s\033[0m", data['TIME'])
+            logger.error("\033[31m got raw time column: %s\033[0m", data['TIME'])
+            logger.error("\033[31m got raw rate column: %s\033[0m", data['RATE'])
+            logger.error("\033[31m got raw error column: %s\033[0m", data['ERROR'])
 
             if delta_t is not None:
                 delta_t = np.int(delta_t/instr_t_bin)*instr_t_bin
@@ -187,16 +192,23 @@ class SpicasLigthtCurve(LightCurveProduct):
 
                     msk = digitized_ids == binned_id
                     _t_frac[ID] = msk.sum()*instr_t_bin
-                    binned_data['RATE'][ID] = np.sum(data['RATE'][msk])
+                    binned_data['RATE'][ID] = np.mean(data['RATE'][msk])
                     binned_data['TIME'][ID] = np.mean(data['TIME'][msk])
+                    binned_data['ERROR'][ID] = np.sqrt(binned_data['RATE'][ID]*_t_frac[ID])/_t_frac[ID]
+                
+                logger.info('binned data rate %s', binned_data['RATE'])
+                logger.info('binned data ERROR %s', binned_data['ERROR'])
 
-                binned_data['RATE'] *= 1.0/_t_frac
-                binned_data['ERROR'] = np.sqrt(binned_data['RATE']/_t_frac)
                 data = binned_data
 
+                logger.info('binned rate')
             else:
-                data['RATE'] = data['RATE'] / instr_t_bin
-                data['ERROR'] = np.sqrt(data['RATE']/instr_t_bin)
+                logger.info('raw rate')
+                data['RATE'] = data['RATE'] 
+                data['ERROR'] = np.sqrt(data['RATE'] * instr_t_bin) / instr_t_bin
+
+            logger.info("data mean: %s error mean %s", np.mean(data['RATE']), np.mean(data['ERROR']))
+            
 
             header = {}
             header['EXTNAME'] = 'RATE'
@@ -234,6 +246,8 @@ class SpicasLigthtCurve(LightCurveProduct):
             units_dict['RATE'] = 'count/s'
             units_dict['ERROR'] = 'count/s'
             units_dict['TIME'] = 's'
+
+            logger.info("data std: %s", np.std(data['RATE']/data['ERROR']))
 
             npd = NumpyDataProduct(data_unit=NumpyDataUnit(data=data,
                                                            name='RATE',
