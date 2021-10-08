@@ -47,8 +47,7 @@ def test_default(dispatcher_live_fixture):
     assert c.status_code == 200
 
     assert jdata['job_status'] == 'done'
-    assert jdata['exit'] == 'done'
-
+    
 
 @pytest.mark.odaapi
 def test_odaapi(dispatcher_live_fixture):
