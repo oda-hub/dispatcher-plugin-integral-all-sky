@@ -1,4 +1,4 @@
--e git+https://github.com/oda-hub/dispatcher-app.git@get_query_products-error-message#egg=cdci_data_analysis[test]
+-e git+https://github.com/oda-hub/dispatcher-app.git@master#egg=cdci_data_analysis[test]
 astropy
 simple_logger
 numpy
