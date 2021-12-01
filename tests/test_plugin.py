@@ -107,4 +107,4 @@ def test_request_too_large(dispatcher_live_fixture):
     assert c.status_code == 200
 
     assert jdata['job_status'] == 'failed'
-    assert 'SPI-ACS backend refuses to process this request' in jdata['exit_status']['message']
+    assert 'SPI-ACS backend refuses to process this request' in jdata['exit_status']['error_message']
