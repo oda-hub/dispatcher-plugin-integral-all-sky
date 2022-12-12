@@ -161,14 +161,14 @@ class SpicasLigthtCurve(LightCurveProduct):
                                    ('ERROR', float)]
                             )
 
-            logger.error("\033[31m got raw time column: %s\033[0m", data['TIME'])
-            logger.error("\033[31m got raw rate column: %s\033[0m", data['RATE'])
-            logger.error("\033[31m got raw error column: %s\033[0m", data['ERROR'])
+            logger.info("\033[31m got raw time column: %s\033[0m", data['TIME'])
+            logger.info("\033[31m got raw rate column: %s\033[0m", data['RATE'])
+            logger.info("\033[31m got raw error column: %s\033[0m", data['ERROR'])
 
             if delta_t is not None:
                 delta_t = np.int(delta_t/instr_t_bin)*instr_t_bin
 
-            logger.error("\033[31m got delta_t %s, instr_t_bin %s\033[0m", delta_t, instr_t_bin)
+            logger.info("\033[31m got delta_t %s, instr_t_bin %s\033[0m", delta_t, instr_t_bin)
 
             if delta_t is None:
                 meta_data['time_bin'] = instr_t_bin
