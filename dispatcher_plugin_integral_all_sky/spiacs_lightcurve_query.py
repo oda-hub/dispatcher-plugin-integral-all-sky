@@ -166,7 +166,7 @@ class SpicasLigthtCurve(LightCurveProduct):
             logger.info("\033[31m got raw error column: %s\033[0m", data['ERROR'])
 
             if delta_t is not None:
-                delta_t = np.int(delta_t/instr_t_bin)*instr_t_bin
+                delta_t = int(delta_t/instr_t_bin)*instr_t_bin
 
             logger.info("\033[31m got delta_t %s, instr_t_bin %s\033[0m", delta_t, instr_t_bin)
 
