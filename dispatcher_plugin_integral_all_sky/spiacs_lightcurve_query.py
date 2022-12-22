@@ -263,7 +263,7 @@ class SpicasLigthtCurve(LightCurveProduct):
             lc_list.append(lc)
 
         except Exception as e:
-            logger.error(traceback.format_exc())
+            logger.info(traceback.format_exc())
 
             raise SpiacsAnalysisException(
                 message='spiacs light curve failed: %s' % e.__repr__(), debug_message=str(e))

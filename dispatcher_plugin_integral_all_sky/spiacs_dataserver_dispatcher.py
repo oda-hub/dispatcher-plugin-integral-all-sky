@@ -180,14 +180,14 @@ class SpiacsDispatcher(object):
                 t0_isot=param_dict['t0_isot'],
                 dt_s=param_dict['dt_s'],
             )
-            logger.error('calling GET on %s', url)
+            logger.debug('calling GET on %s', url)
             res = requests.get("%s" % (url), params=param_dict)
 
             if len(res.content) < 8000: # typical length to avoid searching in long strings, which can not be errors of this kind
                 if 'this service are limited' in res.text or 'Over revolution' in res.text:
                     raise SpiacsAnalysisException(f"SPI-ACS backend refuses to process this request, due to resource constrain: {res.text}")
 
-            logger.error('data server returned %s of len %s text: %s...', res, len(res.content), res.text[:500])
+            logger.debug('data server returned %s of len %s text: %s...', res, len(res.content), res.text[:500])
 
         except ConnectionError as e:
 
