@@ -38,6 +38,7 @@ __author__ = "Andrea Tramacere"
 from . import conf_file, conf_dir
 
 from cdci_data_analysis.analysis.queries import  *
+from cdci_data_analysis.analysis.parameters import Name
 from cdci_data_analysis.analysis.instrument import Instrument
 from .spiacs_dataserver_dispatcher import   SpiacsDispatcher
 
@@ -65,11 +66,14 @@ def spiacs_factory():
 
 
 
-    instr_query_pars=common_instr_query()
+    instr_query_pars = common_instr_query()
 
-    instr_query=InstrumentQuery(
+    data_level = Name(name_format='str', name='data level', value="ordinary")
+    data_level._allowed_values = ["ordinary", "realtime"]
+
+    instr_query = InstrumentQuery(
         name='spiacs_parameters',
-        extra_parameters_list=instr_query_pars,
+        extra_parameters_list=instr_query_pars + [data_level],
         input_prod_list_name=None,
         input_prod_value=None,
         catalog=None,
@@ -90,9 +94,11 @@ def spiacs_factory():
     print('--> conf_file',conf_file)
     print('--> conf_dir', conf_dir)
 
+
+
     return  Instrument('spi_acs',
                        asynch=False,
-                       data_serve_conf_file=conf_file,
+                       data_serve_conf_file=conf_file,                    
                        src_query=src_query,
                        instrumet_query=instr_query,
                        product_queries_list=[light_curve],

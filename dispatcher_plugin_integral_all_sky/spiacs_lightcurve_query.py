@@ -19,6 +19,7 @@ Module API
 """
 
 from __future__ import absolute_import, division, print_function
+from typing import List
 
 from builtins import (bytes, str, open, super, range,
                       zip, round, input, int, pow, object, map, zip)
@@ -73,7 +74,7 @@ class DummySpiacsRes(object):
         pass
 
 
-class SpicasLigthtCurve(LightCurveProduct):
+class SpicasLightCurve(LightCurveProduct):
     def __init__(self, name, file_name, data, header, prod_prefix=None, out_dir=None, src_name=None, meta_data={}):
 
         if meta_data == {} or meta_data is None:
@@ -282,14 +283,15 @@ class SpiacsLightCurveQuery(LightCurveQuery):
 
         T1 = instrument.get_par_by_name('T1')._astropy_time
         T2 = instrument.get_par_by_name('T2')._astropy_time
-        delta_t = instrument.get_par_by_name(
-            'time_bin')._astropy_time_delta.sec
+        
+        delta_t = instrument.get_par_by_name('time_bin')._astropy_time_delta.sec
+
         #T_ref = time.Time((T2.mjd + T1.mjd) * 0.5, format='mjd').isot
-        prod_list = SpicasLigthtCurve.build_from_res(res,
-                                                     src_name=src_name,
-                                                     prod_prefix=prod_prefix,
-                                                     out_dir=out_dir,
-                                                     delta_t=delta_t)
+        prod_list = SpicasLightCurve.build_from_res(res,
+                                                    src_name=src_name,
+                                                    prod_prefix=prod_prefix,
+                                                    out_dir=out_dir,
+                                                    delta_t=delta_t)
 
         # print('spectrum_list',spectrum_list)
 
@@ -349,13 +351,7 @@ class SpiacsLightCurveQuery(LightCurveQuery):
 
             if api == True:
                 _data_list.append(query_lc.data)
-                # try:
-                #    open(root_file_path.path, "wb").write(BinaryData().decode(res_json['root_file_b64']))
-                #    lc.root_file_path = root_file_path
-                # except:
-                #    pass
-                # _d,md=BinaryData(str(query_lc.root_file_path)).encode()
-                # _binary_data_list.append(_d)
+
 
         query_out = QueryOutput()
 
@@ -390,7 +386,7 @@ class SpiacsLightCurveQuery(LightCurveQuery):
         res.__setattr__('content', text)
         #res.__setattr__('dummy_lc', '%s/polar_query_lc.fits' % dummy_cache)
 
-        prod_list = SpicasLigthtCurve.build_from_res(res,
+        prod_list = SpicasLightCurve.build_from_res(res,
                                                      src_name='lc',
                                                      prod_prefix=prod_prefix,
                                                      out_dir=out_dir)
@@ -398,3 +394,21 @@ class SpiacsLightCurveQuery(LightCurveQuery):
         prod_list = QueryProductList(prod_list=prod_list)
         #
         return prod_list
+
+
+    def check_query_roles(self, provided_roles: List[str], par_dic: dict):
+        needed_roles = []
+        needed_roles_with_comments = {}
+
+        data_class = par_dic.get('data_level')
+
+        if data_class == 'realtime':
+            needed_roles.append('integral-realtime')
+            needed_roles_with_comments['integral-realtime'] = "access to real time data requires special role"
+
+        if all([needed_role in provided_roles for needed_role in needed_roles]):
+            return dict(authorization=True, needed_roles=[])
+        else:
+            return dict(authorization=False, needed_roles=needed_roles,
+                        needed_roles_with_comments=needed_roles_with_comments)
+
