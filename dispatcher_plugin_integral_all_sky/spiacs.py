@@ -38,7 +38,6 @@ __author__ = "Andrea Tramacere"
 from . import conf_file, conf_dir
 
 from cdci_data_analysis.analysis.queries import  *
-from cdci_data_analysis.analysis.parameters import Name
 from cdci_data_analysis.analysis.instrument import Instrument
 from .spiacs_dataserver_dispatcher import   SpiacsDispatcher
 

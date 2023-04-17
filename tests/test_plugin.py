@@ -15,8 +15,8 @@ default_parameters = dict(
     product='spi_acs_lc',
     RA='255.98655344',
     DEC='-37.84414224',
-    T1='2005-03-15T20:27:40.0',
-    T2='2005-03-15T20:32:15.0',
+    T1='2023-03-25T20:27:40.0',
+    T2='2023-03-25T20:32:15.0',
     time_bin=2,
     product_type='spi_acs_lc'
 )
@@ -157,8 +157,7 @@ def test_realtime(dispatcher_live_fixture, dispatcher_test_conf, roles):
     params['token'] = construct_token(roles.split(","), dispatcher_test_conf)
 
     c = requests.get(server + "/run_analysis",
-                     params=params
-    )
+                     params=params)
 
     logger.info("content: %s", c.text)
     jdata = c.json()

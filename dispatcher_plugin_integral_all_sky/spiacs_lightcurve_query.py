@@ -19,6 +19,7 @@ Module API
 """
 
 from __future__ import absolute_import, division, print_function
+import json
 from typing import List
 
 from builtins import (bytes, str, open, super, range,
@@ -76,6 +77,8 @@ class DummySpiacsRes(object):
         pass
 
 
+integral_mjdref = 51544.0
+
 class SpicasLightCurve(LightCurveProduct):
     def __init__(self, name, file_name, data, header, prod_prefix=None, out_dir=None, src_name=None, meta_data={}):
 
@@ -99,11 +102,11 @@ class SpicasLightCurve(LightCurveProduct):
     @classmethod
     def build_from_res(cls,
                        res,
+                       data_level,
                        src_name='',
                        prod_prefix='spiacs_lc',
                        out_dir=None,
-                       delta_t=None,
-                       integral_mjdref=51544.0):
+                       delta_t=None):
 
         lc_list = []
 
@@ -128,87 +131,19 @@ class SpicasLightCurve(LightCurveProduct):
         try:
             # [IJD] [seconds since reference] [counts in bin] [seconds since midnight]
 
-            #print(f"\033[31m{res_text_stripped}\033[0m")
-            #open("res.txt", "w").write(res_text_stripped)
-
-            data = np.genfromtxt(
-                io.StringIO(res_text_stripped),
-                delimiter=" ",
-                usecols=[0, 2],
-                dtype=[('TIME_IJD', '<f8'), ('COUNTS', '<f8')])
-
-            assert len(data['TIME_IJD']) > 100            
-            
-            dt_s = (data['TIME_IJD'][1:] - data['TIME_IJD'][:-1]) * 24 * 3600
-
-            unique_dt_s, unique_dt_s_counts = np.unique(
-                np.round(dt_s, 3), return_counts=True)
-            i = np.argmax(unique_dt_s_counts)
-            instr_t_bin = unique_dt_s[i]
-
-            logging.info("deduced instr_t_bin: %s, fraction %s",
-                         instr_t_bin, unique_dt_s_counts[i]/len(dt_s))
-
-            t_ref = time.Time(
-                (data['TIME_IJD'][0] + data['TIME_IJD'][-1]) /
-                2 + integral_mjdref,
-                format='mjd')
-
-            # IJD offset from MJD, https://heasarc.gsfc.nasa.gov/W3Browse/integral/intscw.html
-            data = np.array(list(zip((data['TIME_IJD'] - t_ref.mjd + integral_mjdref) * 24 * 3600,
-                                     data['COUNTS'] / instr_t_bin,
-                                     data['COUNTS'] ** 0.5 / instr_t_bin
-                                     )),
-                            dtype=[('TIME', float),
-                                   ('RATE', float),
-                                   ('ERROR', float)]
-                            )
-
-            logger.info("\033[31m got raw time column: %s\033[0m", data['TIME'])
-            logger.info("\033[31m got raw rate column: %s\033[0m", data['RATE'])
-            logger.info("\033[31m got raw error column: %s\033[0m", data['ERROR'])
-
-            if delta_t is not None:
-                delta_t = int(delta_t/instr_t_bin)*instr_t_bin
-
-            logger.info("\033[31m got delta_t %s, instr_t_bin %s\033[0m", delta_t, instr_t_bin)
-
-            if delta_t is None:
-                meta_data['time_bin'] = instr_t_bin
+            if data_level == 'ordinary':
+                data = cls.parse_ordinary_data(res_text_stripped)
+                comment = []
             else:
-                meta_data['time_bin'] = delta_t
+                data, comment = cls.parse_realtime_data(res_text_stripped)
 
-            t_start = data['TIME'][0]
-            t_stop = data['TIME'][-1] + instr_t_bin
-            if delta_t is not None and delta_t > instr_t_bin:
+            data, extra_meta_data = cls.reformat_and_rebin(data, delta_t)
 
-                t1 = data['TIME'][0]
-                t2 = data['TIME'][-1] + instr_t_bin
+            t_start = extra_meta_data.pop('t_start')
+            t_stop = extra_meta_data.pop('t_stop')
+            t_ref =  extra_meta_data.pop('t_ref')
 
-                digitized_ids = np.digitize(
-                    data['TIME'], np.arange(t1, t2, delta_t))
-
-                binned_data = np.zeros(np.unique(digitized_ids).size, dtype=[
-                                       ('TIME', '<f8'), ('RATE', '<f8'), ('ERROR', '<f8')])
-                _t_frac = np.zeros(binned_data.size)
-                for ID, binned_id in enumerate(np.unique(digitized_ids)):
-
-                    msk = digitized_ids == binned_id
-                    _t_frac[ID] = msk.sum()*instr_t_bin
-                    binned_data['RATE'][ID] = np.mean(data['RATE'][msk])
-                    binned_data['TIME'][ID] = np.mean(data['TIME'][msk])
-                    binned_data['ERROR'][ID] = np.sqrt(binned_data['RATE'][ID]*_t_frac[ID])/_t_frac[ID]
-                
-                logger.info('binned data rate %s', binned_data['RATE'])
-                logger.info('binned data ERROR %s', binned_data['ERROR'])
-
-                data = binned_data
-
-                logger.info('binned rate')
-            else:
-                logger.info('raw rate')
-                data['RATE'] = data['RATE'] 
-                data['ERROR'] = np.sqrt(data['RATE'] * instr_t_bin) / instr_t_bin
+            meta_data.update(extra_meta_data)
 
             logger.info("data mean: %s error mean %s", np.mean(data['RATE']), np.mean(data['ERROR']))
             
@@ -217,7 +152,7 @@ class SpicasLightCurve(LightCurveProduct):
             header['EXTNAME'] = 'RATE'
             header['TIMESYS'] = 'TT'
             header['TIMEREF'] = 'LOCAL'
-            header['ONTIME'] = t_stop-t_start
+            header['ONTIME'] = t_stop - t_start
             header['TASSIGN'] = 'SATELLITE'
 
             Integral_jd = (t_ref.mjd-integral_mjdref)*u.day
@@ -244,6 +179,7 @@ class SpicasLightCurve(LightCurveProduct):
             header['TIMEZERO'] = (
                 t_ref.value*u.d-integral_mjdref*u.d).to('s').value
             header['TIMEUNIT'] = 's '
+            header['COMMENT'] = comment
             units_dict = {}
 
             units_dict['RATE'] = 'count/s'
@@ -259,6 +195,7 @@ class SpicasLightCurve(LightCurveProduct):
                                                            units_dict=units_dict),
                                    meta_data=meta_data)
 
+
             lc = cls(name=src_name, data=npd, header=None, file_name=file_name, out_dir=out_dir,
                      prod_prefix=prod_prefix,
                      src_name=src_name, meta_data=meta_data)
@@ -272,6 +209,122 @@ class SpicasLightCurve(LightCurveProduct):
                 message='spiacs light curve failed: %s' % e.__repr__(), debug_message=str(e))
 
         return lc_list
+
+
+    @classmethod
+    def parse_ordinary_data(cls, res_text_stripped):
+        data = np.genfromtxt(
+                    io.StringIO(res_text_stripped),
+                    delimiter=" ",
+                    usecols=[0, 2],
+                    dtype=[('TIME_IJD', '<f8'), ('COUNTS', '<f8')])
+
+        assert len(data['TIME_IJD']) > 100
+
+        return data
+        
+        
+
+    @classmethod
+    def parse_realtime_data(cls, res_text_stripped):
+        jdata = json.loads(res_text_stripped)
+
+        cn = jdata['lc']['columns']
+        cd  = np.array(jdata['lc']['data'])
+
+        data = np.zeros(cd.shape[0], dtype=[('TIME_IJD', '<f8'), ('COUNTS', '<f8')])
+
+        data['TIME_IJD'] = cd[:, cn.index('ijd')]
+        data['COUNTS'] = cd[:, cn.index('counts')]
+
+        assert len(data['TIME_IJD']) > 100            
+        
+        return data, jdata['prophecy']
+
+
+    @classmethod
+    def reformat_and_rebin(cls, data, delta_t):
+        meta_data = {}
+
+        dt_s = (data['TIME_IJD'][1:] - data['TIME_IJD'][:-1]) * 24 * 3600
+
+        unique_dt_s, unique_dt_s_counts = np.unique(
+            np.round(dt_s, 3), return_counts=True)
+        i = np.argmax(unique_dt_s_counts)
+        instr_t_bin = unique_dt_s[i]
+
+
+        logging.info("deduced instr_t_bin: %s, fraction %s",
+                        instr_t_bin, unique_dt_s_counts[i]/len(dt_s))
+
+        t_ref = time.Time(
+            (data['TIME_IJD'][0] + data['TIME_IJD'][-1]) /
+            2 + integral_mjdref,
+            format='mjd')
+
+        # IJD offset from MJD, https://heasarc.gsfc.nasa.gov/W3Browse/integral/intscw.html
+        data = np.array(list(zip((data['TIME_IJD'] - t_ref.mjd + integral_mjdref) * 24 * 3600,
+                                    data['COUNTS'] / instr_t_bin,
+                                    data['COUNTS'] ** 0.5 / instr_t_bin
+                                    )),
+                        dtype=[('TIME', float),
+                                ('RATE', float),
+                                ('ERROR', float)]
+                        )
+
+        logger.info("\033[31m got raw time column: %s\033[0m", data['TIME'])
+        logger.info("\033[31m got raw rate column: %s\033[0m", data['RATE'])
+        logger.info("\033[31m got raw error column: %s\033[0m", data['ERROR'])
+
+        if delta_t is not None:
+            delta_t = int(delta_t/instr_t_bin)*instr_t_bin
+
+        logger.info("\033[31m got delta_t %s, instr_t_bin %s\033[0m", delta_t, instr_t_bin)
+
+        if delta_t is None:
+            meta_data['time_bin'] = instr_t_bin
+        else:
+            meta_data['time_bin'] = delta_t
+
+        t_start = data['TIME'][0]
+        t_stop = data['TIME'][-1] + instr_t_bin
+        if delta_t is not None and delta_t > instr_t_bin:
+
+            t1 = data['TIME'][0]
+            t2 = data['TIME'][-1] + instr_t_bin
+
+            digitized_ids = np.digitize(
+                data['TIME'], np.arange(t1, t2, delta_t))
+
+            binned_data = np.zeros(np.unique(digitized_ids).size, dtype=[
+                                    ('TIME', '<f8'), ('RATE', '<f8'), ('ERROR', '<f8')])
+            _t_frac = np.zeros(binned_data.size)
+            for ID, binned_id in enumerate(np.unique(digitized_ids)):
+
+                msk = digitized_ids == binned_id
+                _t_frac[ID] = msk.sum()*instr_t_bin
+                binned_data['RATE'][ID] = np.mean(data['RATE'][msk])
+                binned_data['TIME'][ID] = np.mean(data['TIME'][msk])
+                binned_data['ERROR'][ID] = np.sqrt(binned_data['RATE'][ID]*_t_frac[ID])/_t_frac[ID]
+            
+            logger.info('binned data rate %s', binned_data['RATE'])
+            logger.info('binned data ERROR %s', binned_data['ERROR'])
+
+            data = binned_data
+
+            logger.info('binned rate')
+        else:
+            logger.info('raw rate')
+            data['RATE'] = data['RATE'] 
+            data['ERROR'] = np.sqrt(data['RATE'] * instr_t_bin) / instr_t_bin
+
+        meta_data['t_start'] = t_start
+        meta_data['t_stop'] = t_stop
+        meta_data['t_ref'] = t_ref
+
+        return data, meta_data
+
+
 
 
 class SpiacsLightCurveQuery(LightCurveQuery):
@@ -290,16 +343,14 @@ class SpiacsLightCurveQuery(LightCurveQuery):
         T2 = instrument.get_par_by_name('T2')._astropy_time
         
         delta_t = instrument.get_par_by_name('time_bin')._astropy_time_delta.sec
+        data_level = instrument.get_par_by_name('data_level').value
 
-        #T_ref = time.Time((T2.mjd + T1.mjd) * 0.5, format='mjd').isot
         prod_list = SpicasLightCurve.build_from_res(res,
+                                                    data_level=data_level,
                                                     src_name=src_name,
                                                     prod_prefix=prod_prefix,
                                                     out_dir=out_dir,
                                                     delta_t=delta_t)
-
-        # print('spectrum_list',spectrum_list)
-
         return prod_list
 
     def get_data_server_query(self, instrument,
@@ -308,10 +359,13 @@ class SpiacsLightCurveQuery(LightCurveQuery):
         T1 = instrument.get_par_by_name('T1')._astropy_time
         T2 = instrument.get_par_by_name('T2')._astropy_time
 
+        data_level = instrument.get_par_by_name('data_level').value
+
         delta_t = T2 - T1
         delta_t_s = delta_t.sec * 0.5
         T_ref = time.Time((T2.mjd + T1.mjd) * 0.5, format='mjd').isot
-        param_dict = self.set_instr_dictionaries(T_ref, delta_t_s)
+
+        param_dict = self.set_instr_dictionaries(T_ref, delta_t_s, data_level)
 
         q = SpiacsDispatcher(instrument=instrument,
                              config=config,
@@ -319,10 +373,11 @@ class SpiacsLightCurveQuery(LightCurveQuery):
 
         return q
 
-    def set_instr_dictionaries(self, T_ref, delta_t_s):
+    def set_instr_dictionaries(self, T_ref, delta_t_s, data_level):
         return dict(
             t0_isot=T_ref,
             dt_s=delta_t_s,
+            data_level=data_level
         )
 
     def process_product_method(self, instrument, prod_list, api=False):
@@ -335,8 +390,6 @@ class SpiacsLightCurveQuery(LightCurveQuery):
         _data_list = []
         _binary_data_list = []
         for query_lc in prod_list.prod_list:
-            # print('->name',query_lc.name)
-
             # TODO: why is _current_par_dic only used here? Does base dispatcher need to support this?
             query_lc.add_url_to_fits_file(
                 instrument._current_par_dic, url=instrument.disp_conf.products_url)
@@ -375,7 +428,6 @@ class SpiacsLightCurveQuery(LightCurveQuery):
         return query_out
 
     def get_dummy_products(self, instrument, config, out_dir='./', prod_prefix='spiacs', api=False):
-        # print('config',config)
         config = DataServerConf.from_conf_dict(
             instrument.data_server_conf_dict)
 

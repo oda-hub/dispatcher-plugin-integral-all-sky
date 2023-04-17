@@ -131,9 +131,6 @@ class SpiacsDispatcher(object):
             _data_server_port = config.data_server_port
 
         except Exception as e:
-            #    #print(e)
-
-            print("ERROR->")
             raise RuntimeError(f"failed to use config {e}")
 
         self.config(_data_server_url, _data_server_port)
@@ -176,12 +173,19 @@ class SpiacsDispatcher(object):
     def _run(self, data_server_url, param_dict):
 
         try:
+
             url = data_server_url.format(
                 t0_isot=param_dict['t0_isot'],
                 dt_s=param_dict['dt_s'],
             )
-            logger.debug('calling GET on %s', url)
-            res = requests.get("%s" % (url), params=param_dict)
+
+            if param_dict['data_level'] == 'realtime':
+                url = url.replace("genlc/ACS", "rtlc") + "?json&prophecy"
+
+            logger.info("calling data server %s with %s", data_server_url, param_dict)
+            logger.info('calling GET on %s', url)
+
+            res = requests.get(url, params=param_dict)
 
             if len(res.content) < 8000: # typical length to avoid searching in long strings, which can not be errors of this kind
                 if 'this service are limited' in res.text or 'Over revolution' in res.text:
@@ -212,6 +216,7 @@ class SpiacsDispatcher(object):
             logger.info('call_back_url %s', call_back_url)
             logger.info('data_server_url %s', self.data_server_url)
             logger.info('*** run_asynch %s', run_asynch)
+            logger.warning('param_dict %s', param_dict)
 
             res = self._run(self.data_server_url, param_dict)
             
