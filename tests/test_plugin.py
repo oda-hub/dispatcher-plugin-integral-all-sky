@@ -125,7 +125,6 @@ def test_request_too_large(dispatcher_live_fixture):
                          'T2': '2004-03-16T00:03:15.0',
                          'query_status': 'new',                         
                          'query_type': 'Real',
-                         'data_level': 'realtime'
                          }
     )
 
