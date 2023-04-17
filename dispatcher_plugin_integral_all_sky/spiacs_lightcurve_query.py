@@ -32,6 +32,8 @@ __author__ = "Andrea Tramacere"
 import os
 import io
 
+from cdci_data_analysis.analysis.parameters import Name
+
 # Dependencies
 # eg numpy
 # absolute import eg: import numpy as np
@@ -276,7 +278,10 @@ class SpiacsLightCurveQuery(LightCurveQuery):
 
     def __init__(self, name):
 
-        super(SpiacsLightCurveQuery, self).__init__(name)
+        data_level = Name(name_format='str', name='data_level', value="ordinary")
+        data_level._allowed_values = ["ordinary", "realtime"]
+
+        super(SpiacsLightCurveQuery, self).__init__(name, parameters_list=[data_level])
 
     def build_product_list(self, instrument, res, out_dir, prod_prefix='spiacs_lc', api=False):
         src_name = 'query'
@@ -376,6 +381,7 @@ class SpiacsLightCurveQuery(LightCurveQuery):
 
         meta_data = {'product': 'light_curve',
                      'instrument': 'isgri', 'src_name': ''}
+
         meta_data['query_parameters'] = self.get_parameters_list_as_json()
 
         dummy_cache = config.dummy_cache

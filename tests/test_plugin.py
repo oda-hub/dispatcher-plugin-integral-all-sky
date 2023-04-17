@@ -2,6 +2,7 @@ import requests
 import time
 import json
 import logging
+import jwt
 
 import pytest
 import numpy as np
@@ -19,6 +20,33 @@ default_parameters = dict(
     time_bin=2,
     product_type='spi_acs_lc'
 )
+
+
+def construct_token(roles, dispatcher_test_conf, expires_in=5000):
+    secret_key = dispatcher_test_conf['secret_key']
+
+    default_exp_time = int(time.time()) + expires_in
+    default_token_payload = dict(
+        sub="mtm@mtmco.net",
+        name="mmeharga",
+        roles="general",
+        exp=default_exp_time,
+        tem=0,
+        mstout=True,
+        mssub=True
+    )
+
+    token_payload = {
+        **default_token_payload,
+        "roles": roles
+    }
+
+    encoded_token = jwt.encode(token_payload, secret_key, algorithm='HS256')
+
+    if isinstance(encoded_token, bytes):
+        encoded_token = encoded_token.decode()
+
+    return encoded_token
 
 
 def test_discover_plugin():
@@ -113,23 +141,37 @@ def test_request_too_large(dispatcher_live_fixture):
 
 
 
-
-def test_realtime(dispatcher_live_fixture):
+@pytest.mark.parametrize("roles", ["integral-realtime", ""])
+def test_realtime(dispatcher_live_fixture, dispatcher_test_conf, roles):
     server = dispatcher_live_fixture
 
     logger.info("constructed server: %s", server)
+
+    params = {
+                **default_parameters,
+                'query_status': 'new',
+                'query_type': 'Real',
+                'data_level': 'realtime'
+            }
+
+    params['token'] = construct_token(roles.split(","), dispatcher_test_conf)
+
     c = requests.get(server + "/run_analysis",
-                     params={
-                         **default_parameters,
-                         'query_status': 'new',
-                         'query_type': 'Real'
-                         }
+                     params=params
     )
 
     logger.info("content: %s", c.text)
     jdata = c.json()
     logger.info(json.dumps(jdata, indent=4, sort_keys=True))
     logger.info(jdata)
-    assert c.status_code == 200
 
-    assert jdata['job_status'] == 'done'
+    print(jdata)
+
+    if roles:
+        assert jdata['job_status'] == 'done'
+        assert c.status_code == 200
+        print(jdata['products']['analysis_parameters'])
+    else:
+        assert jdata['job_status'] == 'failed'
+        assert c.status_code == 403
+
