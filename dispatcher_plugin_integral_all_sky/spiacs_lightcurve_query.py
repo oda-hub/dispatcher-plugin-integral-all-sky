@@ -307,8 +307,8 @@ class SpicasLightCurve(LightCurveProduct):
                 binned_data['TIME'][ID] = np.mean(data['TIME'][msk])
                 binned_data['ERROR'][ID] = np.sqrt(binned_data['RATE'][ID]*_t_frac[ID])/_t_frac[ID]
             
-            logger.info('binned data rate %s', binned_data['RATE'])
-            logger.info('binned data ERROR %s', binned_data['ERROR'])
+            logger.info('binned data RATE %s', binned_data['RATE'])
+            logger.info('binned data RATE_ERROR %s', binned_data['ERROR'])
 
             data = binned_data
 

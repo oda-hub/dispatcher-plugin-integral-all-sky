@@ -18,7 +18,7 @@ default_parameters = dict(
     T1='2023-03-25T20:27:40.0',
     T2='2023-03-25T20:32:15.0',
     time_bin=2,
-    product_type='spi_acs_lc'
+    product_type='spi_acs_lc',
 )
 
 
@@ -92,27 +92,79 @@ def test_odaapi(dispatcher_live_fixture):
 
 
 @pytest.mark.odaapi
-def test_odaapi_data(dispatcher_live_fixture):
+@pytest.mark.parametrize("data_level", ["realtime", "ordinary"])
+@pytest.mark.parametrize("roles", ["integral-realtime", ""])
+def test_odaapi_data(dispatcher_live_fixture, data_level, dispatcher_test_conf, roles):
     import oda_api.api
 
+    params = {**default_parameters, 'data_level': data_level}
+    params['token'] = construct_token(roles.split(","), dispatcher_test_conf)
+        
+    def get_products():
+        product_spiacs = oda_api.api.DispatcherAPI(
+            url=dispatcher_live_fixture).get_product(**params)
+
+        product_spiacs_raw_bin = oda_api.api.DispatcherAPI(
+            url=dispatcher_live_fixture).get_product(**{**params, 'time_bin': 0.05})
+        
+        return product_spiacs, product_spiacs_raw_bin
+        
+    if data_level == "realtime" and roles == "":
+        with pytest.raises(Exception) as excinfo:
+            get_products()
+
+        assert 'Unfortunately, your priviledges are not sufficient' in str(excinfo.value)
+    else:
+        product_spiacs, product_spiacs_raw_bin = get_products()
+
+        assert product_spiacs.spi_acs_lc_0_query.data_unit[1].header['INSTRUME'] == "SPI-ACS"
+        assert product_spiacs_raw_bin.spi_acs_lc_0_query.data_unit[1].header['INSTRUME'] == "SPI-ACS"
+
+        data = np.array(product_spiacs.spi_acs_lc_0_query.data_unit[1].data)
+        data_raw_bin = np.array(product_spiacs_raw_bin.spi_acs_lc_0_query.data_unit[1].data)
+        
+        assert len(data) > 100
+        assert len(data_raw_bin) > 100
+        
+        assert np.std((data['RATE'] - np.mean(data['RATE']))/data['ERROR']) < 1.5
+        assert np.std((data_raw_bin['RATE'] - np.mean(data_raw_bin['RATE']))/data_raw_bin['ERROR']) < 1.5
+
+
+@pytest.mark.odaapi
+def test_odaapi_data_coherence(dispatcher_live_fixture, dispatcher_test_conf):
+    import oda_api.api
+
+    params = {**default_parameters, 'time_bin': 0.05}
+    params['token'] = construct_token(["integral-realtime"], dispatcher_test_conf)
+        
     product_spiacs = oda_api.api.DispatcherAPI(
-        url=dispatcher_live_fixture).get_product(**default_parameters)
+        url=dispatcher_live_fixture).get_product(**params)
 
-    product_spiacs_raw_bin = oda_api.api.DispatcherAPI(
-        url=dispatcher_live_fixture).get_product(**{**default_parameters, 'time_bin': 0.05})
-
-
-    assert product_spiacs.spi_acs_lc_0_query.data_unit[1].header['INSTRUME'] == "SPI-ACS"
-    assert product_spiacs_raw_bin.spi_acs_lc_0_query.data_unit[1].header['INSTRUME'] == "SPI-ACS"
-
+    product_spiacs_rt = oda_api.api.DispatcherAPI(
+        url=dispatcher_live_fixture).get_product(**{**params, 'data_level': "realtime"})
+        
     data = np.array(product_spiacs.spi_acs_lc_0_query.data_unit[1].data)
-    data_raw_bin = np.array(product_spiacs_raw_bin.spi_acs_lc_0_query.data_unit[1].data)
-    
+    data_rt = np.array(product_spiacs_rt.spi_acs_lc_0_query.data_unit[1].data)
+        
     assert len(data) > 100
-    assert len(data_raw_bin) > 100
+    assert len(data_rt) > 100
+
+    dt_s = (data['TIME'] - data_rt['TIME']) * 24 * 3600
+    print("dt min, max, mean, std", dt_s.min(), dt_s.max(), dt_s.mean(), dt_s.std())
+
+    cc = np.correlate(data['RATE'], data_rt['RATE'], mode='valid')
+    cc_offset = cc.argmax() - cc.shape[0]//2
+
+    assert np.abs(cc_offset) < 1
+
+    from matplotlib import pyplot as plt
+    plt.plot(data['RATE'])
+    plt.plot(data_rt['RATE'])
+    plt.xlim(0, 10)
+    plt.savefig("test_odaapi_data_coherence.png")
     
-    assert np.std((data['RATE'] - np.mean(data['RATE']))/data['ERROR']) < 1.5
-    assert np.std((data_raw_bin['RATE'] - np.mean(data_raw_bin['RATE']))/data_raw_bin['ERROR']) < 1.5
+    
+    assert (data['RATE'] - data_rt['RATE']).max() < 1e-5
 
 
 def test_request_too_large(dispatcher_live_fixture):
