@@ -22,6 +22,7 @@ from __future__ import absolute_import, division, print_function
 
 from builtins import (bytes, str, open, super, range,
                       zip, round, input, int, pow, object, map, zip)
+import re
 
 __author__ = "Volodymyr Savchenko, Andrea Tramacere"
 
@@ -77,7 +78,7 @@ class SpiacsUnknownException(SpiacsException):
         super(SpiacsUnknownException, self).__init__(message, debug_message)
 
 
-class SpiacsDispatcher(object):
+class SpiacsDispatcher:
 
     def __init__(self, config=None, param_dict=None, instrument=None):
         logger.info('--> building class SpiacsDispatcher instrument: %s config: %s', instrument, config)
@@ -179,6 +180,10 @@ class SpiacsDispatcher(object):
                 dt_s=param_dict['dt_s'],
             )
 
+            url_ephs = data_server_url.replace("genlc/ACS", "ephs").rsplit('/', 1)[0].format(
+                t0_isot=param_dict['t0_isot'],
+            )
+
             if param_dict['data_level'] == 'realtime':
                 url = url.replace("genlc/ACS", "rtlc") + "?json&prophecy"
 
@@ -186,7 +191,8 @@ class SpiacsDispatcher(object):
             logger.info('calling GET on %s', url)
 
             res = requests.get(url, params=param_dict)
-
+            res_ephs = requests.get(url_ephs)
+            
             if len(res.content) < 8000: # typical length to avoid searching in long strings, which can not be errors of this kind
                 if 'this service are limited' in res.text or 'Over revolution' in res.text:
                     raise SpiacsAnalysisException(f"SPI-ACS backend refuses to process this request, due to resource constrain: {res.text}")
@@ -199,7 +205,7 @@ class SpiacsDispatcher(object):
                 f'Spiacs Analysis error: {e}')
 
 
-        return res
+        return res, res_ephs
 
     def run_query(self, call_back_url=None, run_asynch=False, logger=None, param_dict=None,):
 

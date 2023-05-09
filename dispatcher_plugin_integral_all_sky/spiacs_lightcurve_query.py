@@ -20,6 +20,7 @@ Module API
 
 from __future__ import absolute_import, division, print_function
 import json
+import re
 from typing import List
 
 from builtins import (bytes, str, open, super, range,
@@ -108,6 +109,8 @@ class SpicasLightCurve(LightCurveProduct):
                        out_dir=None,
                        delta_t=None):
 
+        (res, res_ephs) = res
+
         lc_list = []
 
         if out_dir is None:
@@ -122,6 +125,7 @@ class SpicasLightCurve(LightCurveProduct):
         meta_data['src_name'] = src_name
 
         res_text_stripped = res.text.replace(r"\n", "\n").strip('" \n\\n')
+        res_ephs_text_stripped = re.sub(r"[\'\" \n\r]+", " ", res_ephs.text).strip('" \n\\n')
 
         for keyword in 'ZeroData', 'NoData':
             if keyword in res_text_stripped:
@@ -179,7 +183,9 @@ class SpicasLightCurve(LightCurveProduct):
             header['TIMEZERO'] = (
                 t_ref.value*u.d-integral_mjdref*u.d).to('s').value
             header['TIMEUNIT'] = 's '
-            header['COMMENT'] = comment
+
+            header['PROPHECY'] = comment
+            header['EPHS'] = res_ephs_text_stripped
             units_dict = {}
 
             units_dict['RATE'] = 'count/s'
@@ -222,8 +228,7 @@ class SpicasLightCurve(LightCurveProduct):
         assert len(data['TIME_IJD']) > 100
 
         return data
-        
-        
+                
 
     @classmethod
     def parse_realtime_data(cls, res_text_stripped):
@@ -234,7 +239,9 @@ class SpicasLightCurve(LightCurveProduct):
 
         data = np.zeros(cd.shape[0], dtype=[('TIME_IJD', '<f8'), ('COUNTS', '<f8')])
 
-        data['TIME_IJD'] = cd[:, cn.index('ijd')]
+        # TODO: add tracked deviation from the accurate time from the past
+        data['TIME_IJD'] = cd[:, cn.index('ijd')] 
+        print("\033[32mdata['TIME_IJD']", data['TIME_IJD'], "\033[0m")
         data['COUNTS'] = cd[:, cn.index('counts')]
 
         assert len(data['TIME_IJD']) > 100            
@@ -258,8 +265,7 @@ class SpicasLightCurve(LightCurveProduct):
                         instr_t_bin, unique_dt_s_counts[i]/len(dt_s))
 
         t_ref = time.Time(
-            (data['TIME_IJD'][0] + data['TIME_IJD'][-1]) /
-            2 + integral_mjdref,
+            (data['TIME_IJD'][0] + data['TIME_IJD'][-1]) / 2 + integral_mjdref,
             format='mjd')
 
         # IJD offset from MJD, https://heasarc.gsfc.nasa.gov/W3Browse/integral/intscw.html
