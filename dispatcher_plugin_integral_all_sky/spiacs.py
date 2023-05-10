@@ -51,23 +51,18 @@ def common_instr_query():
     #TODO make a special class
     #max_pointings=Integer(value=50,name='max_pointings')
 
-
-
     instr_query_pars=[]
-
 
     return instr_query_pars
 
 
 def spiacs_factory():
     print('--> Spiacs Factory')
-    src_query=SourceQuery('src_query')
+    src_query = SourceQuery('src_query')
 
+    instr_query_pars = common_instr_query()
 
-
-    instr_query_pars=common_instr_query()
-
-    instr_query=InstrumentQuery(
+    instr_query = InstrumentQuery(
         name='spiacs_parameters',
         extra_parameters_list=instr_query_pars,
         input_prod_list_name=None,
@@ -79,7 +74,7 @@ def spiacs_factory():
 
 
 
-    light_curve =SpiacsLightCurveQuery('spi_acs_lc_query')
+    light_curve = SpiacsLightCurveQuery('spi_acs_lc_query')
 
 
 
@@ -90,9 +85,11 @@ def spiacs_factory():
     print('--> conf_file',conf_file)
     print('--> conf_dir', conf_dir)
 
+
+
     return  Instrument('spi_acs',
                        asynch=False,
-                       data_serve_conf_file=conf_file,
+                       data_serve_conf_file=conf_file,                    
                        src_query=src_query,
                        instrumet_query=instr_query,
                        product_queries_list=[light_curve],

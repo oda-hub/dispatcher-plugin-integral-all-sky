@@ -22,6 +22,7 @@ from __future__ import absolute_import, division, print_function
 
 from builtins import (bytes, str, open, super, range,
                       zip, round, input, int, pow, object, map, zip)
+import re
 
 __author__ = "Volodymyr Savchenko, Andrea Tramacere"
 
@@ -77,7 +78,7 @@ class SpiacsUnknownException(SpiacsException):
         super(SpiacsUnknownException, self).__init__(message, debug_message)
 
 
-class SpiacsDispatcher(object):
+class SpiacsDispatcher:
 
     def __init__(self, config=None, param_dict=None, instrument=None):
         logger.info('--> building class SpiacsDispatcher instrument: %s config: %s', instrument, config)
@@ -131,9 +132,6 @@ class SpiacsDispatcher(object):
             _data_server_port = config.data_server_port
 
         except Exception as e:
-            #    #print(e)
-
-            print("ERROR->")
             raise RuntimeError(f"failed to use config {e}")
 
         self.config(_data_server_url, _data_server_port)
@@ -176,13 +174,25 @@ class SpiacsDispatcher(object):
     def _run(self, data_server_url, param_dict):
 
         try:
+
             url = data_server_url.format(
                 t0_isot=param_dict['t0_isot'],
                 dt_s=param_dict['dt_s'],
             )
-            logger.debug('calling GET on %s', url)
-            res = requests.get("%s" % (url), params=param_dict)
 
+            url_ephs = data_server_url.replace("genlc/ACS", "ephs").rsplit('/', 1)[0].format(
+                t0_isot=param_dict['t0_isot'],
+            )
+
+            if param_dict['data_level'] == 'realtime':
+                url = url.replace("genlc/ACS", "rtlc") + "?json&prophecy"
+
+            logger.info("calling data server %s with %s", data_server_url, param_dict)
+            logger.info('calling GET on %s', url)
+
+            res = requests.get(url, params=param_dict)
+            res_ephs = requests.get(url_ephs)
+            
             if len(res.content) < 8000: # typical length to avoid searching in long strings, which can not be errors of this kind
                 if 'this service are limited' in res.text or 'Over revolution' in res.text:
                     raise SpiacsAnalysisException(f"SPI-ACS backend refuses to process this request, due to resource constrain: {res.text}")
@@ -195,7 +205,7 @@ class SpiacsDispatcher(object):
                 f'Spiacs Analysis error: {e}')
 
 
-        return res
+        return res, res_ephs
 
     def run_query(self, call_back_url=None, run_asynch=False, logger=None, param_dict=None,):
 
@@ -212,6 +222,7 @@ class SpiacsDispatcher(object):
             logger.info('call_back_url %s', call_back_url)
             logger.info('data_server_url %s', self.data_server_url)
             logger.info('*** run_asynch %s', run_asynch)
+            logger.warning('param_dict %s', param_dict)
 
             res = self._run(self.data_server_url, param_dict)
             
