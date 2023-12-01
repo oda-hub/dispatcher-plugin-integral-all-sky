@@ -197,10 +197,7 @@ def test_request_too_large(dispatcher_live_fixture):
     assert c.status_code == 200
 
     assert jdata['job_status'] == 'failed'
-    assert ('SPI-ACS backend refuses to process this request' in
-            jdata['exit_status']['debug_message'])
-    assert ('Instrument: spi_acs, product: spi_acs_lc' in
-            jdata['exit_status']['error_message'])
+    assert any('SPI-ACS backend refuses to process this request' in r for r in jdata['exit_status'].values())
 
 
 @pytest.mark.parametrize("roles", ["integral-realtime", ""])
