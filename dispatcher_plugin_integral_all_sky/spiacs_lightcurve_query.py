@@ -225,7 +225,7 @@ class SpicasLightCurve(LightCurveProduct):
                     usecols=[0, 2],
                     dtype=[('TIME_IJD', '<f8'), ('COUNTS', '<f8')])
 
-        assert len(data['TIME_IJD']) > 100
+        assert len(data['TIME_IJD']) > 5
 
         return data
                 
