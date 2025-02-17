@@ -405,7 +405,9 @@ class SpiacsLightCurveQuery(LightCurveQuery):
                 _lc_path.append(str(query_lc.file_path.name))
                 # x_label='MJD-%d  (days)' % mjdref,y_label='Rate  (cts/s)'
                 du = query_lc.data.get_data_unit_by_name('RATE')
+                dx = np.zeros(du.data['TIME'].shape) + du.header['TIMEDEL'] / 2.
                 _html_fig.append(query_lc.get_html_draw(x=du.data['TIME'],
+                                                        dx=dx,
                                                         y=du.data['RATE'],
                                                         dy=du.data['ERROR'],
                                                         title='Start Time: %s' % instrument.get_par_by_name(
