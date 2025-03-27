@@ -33,8 +33,8 @@ if conf_dir is not None:
 def find_config():
     config_file_resolution_order=[
         os.environ.get('CDCI_SPIACS_PLUGIN_CONF_FILE','.spiacs_data_server_conf.yml'),
-        os.path.join(conf_dir,'data_server_conf.yml'),
         "/dispatcher/conf/conf.d/spiacs_data_server_conf.yml",
+        os.path.join(conf_dir,'data_server_conf.yml'),
     ]
 
     for conf_file in config_file_resolution_order:
