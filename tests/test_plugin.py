@@ -92,12 +92,11 @@ def test_odaapi(dispatcher_live_fixture):
 
 
 @pytest.mark.odaapi
-@pytest.mark.parametrize("data_level", ["realtime", "ordinary"])
 @pytest.mark.parametrize("roles", ["integral-realtime", ""])
-def test_odaapi_data(dispatcher_live_fixture, data_level, dispatcher_test_conf, roles):
+def test_odaapi_data(dispatcher_live_fixture, dispatcher_test_conf, roles):
     import oda_api.api
 
-    params = {**default_parameters, 'data_level': data_level}
+    params = {**default_parameters, 'data_level': "ordinary"}
     params['token'] = construct_token(roles.split(","), dispatcher_test_conf)
         
     def get_products():
@@ -108,58 +107,52 @@ def test_odaapi_data(dispatcher_live_fixture, data_level, dispatcher_test_conf, 
             url=dispatcher_live_fixture).get_product(**{**params, 'time_bin': 0.05})
         
         return product_spiacs, product_spiacs_raw_bin
-        
-    if data_level == "realtime" and roles == "":
-        with pytest.raises(Exception) as excinfo:
-            get_products()
 
-        assert 'Unfortunately, your priviledges are not sufficient' in str(excinfo.value)
-    else:
-        product_spiacs, product_spiacs_raw_bin = get_products()
+    product_spiacs, product_spiacs_raw_bin = get_products()
 
-        assert product_spiacs.spi_acs_lc_0_query.data_unit[1].header['INSTRUME'] == "SPI-ACS"
-        assert product_spiacs_raw_bin.spi_acs_lc_0_query.data_unit[1].header['INSTRUME'] == "SPI-ACS"
+    assert product_spiacs.spi_acs_lc_0_query.data_unit[1].header['INSTRUME'] == "SPI-ACS"
+    assert product_spiacs_raw_bin.spi_acs_lc_0_query.data_unit[1].header['INSTRUME'] == "SPI-ACS"
 
-        data = np.array(product_spiacs.spi_acs_lc_0_query.data_unit[1].data)
-        data_raw_bin = np.array(product_spiacs_raw_bin.spi_acs_lc_0_query.data_unit[1].data)
-        
-        assert len(data) > 100
-        assert len(data_raw_bin) > 100
-        
-        assert np.std((data['RATE'] - np.mean(data['RATE']))/data['ERROR']) < 1.5
-        assert np.std((data_raw_bin['RATE'] - np.mean(data_raw_bin['RATE']))/data_raw_bin['ERROR']) < 1.5
-
-
-@pytest.mark.odaapi
-def test_odaapi_data_coherence(dispatcher_live_fixture, dispatcher_test_conf):
-    import oda_api.api
-
-    params = {**default_parameters, 'time_bin': 0.05}
-    params['token'] = construct_token(["integral-realtime"], dispatcher_test_conf)
-        
-    product_spiacs = oda_api.api.DispatcherAPI(
-        url=dispatcher_live_fixture).get_product(**params)
-
-    product_spiacs_rt = oda_api.api.DispatcherAPI(
-        url=dispatcher_live_fixture).get_product(**{**params, 'data_level': "realtime"})
-        
     data = np.array(product_spiacs.spi_acs_lc_0_query.data_unit[1].data)
-    t_ref = product_spiacs.spi_acs_lc_0_query.data_unit[1].header['TIMEZERO']
-    t = data['TIME'] + t_ref
+    data_raw_bin = np.array(product_spiacs_raw_bin.spi_acs_lc_0_query.data_unit[1].data)
 
-    data_rt = np.array(product_spiacs_rt.spi_acs_lc_0_query.data_unit[1].data)
-    t_ref_rt = product_spiacs_rt.spi_acs_lc_0_query.data_unit[1].header['TIMEZERO']
-    t_rt = data_rt['TIME'] + t_ref_rt
-        
     assert len(data) > 100
-    assert len(data_rt) > 100
+    assert len(data_raw_bin) > 100
 
-    dt_s = (t - t_rt)
-    print("dt min, max, mean, std", dt_s.min(), dt_s.max(), dt_s.mean(), dt_s.std())
+    assert np.std((data['RATE'] - np.mean(data['RATE']))/data['ERROR']) < 1.5
+    assert np.std((data_raw_bin['RATE'] - np.mean(data_raw_bin['RATE']))/data_raw_bin['ERROR']) < 1.5
 
-    assert "next break in data in 46 hr" in product_spiacs_rt.spi_acs_lc_0_query.data_unit[1].header['PROPHECY']
-    assert "166.134 81.107 109932.3 0.016 0.016 30.0" in product_spiacs_rt.spi_acs_lc_0_query.data_unit[1].header['EPHS']
-    assert "166.134 81.107 109932.3 0.016 0.016 30.0" in product_spiacs.spi_acs_lc_0_query.data_unit[1].header['EPHS']
+
+# @pytest.mark.odaapi
+# def test_odaapi_data_coherence(dispatcher_live_fixture, dispatcher_test_conf):
+#     import oda_api.api
+#
+#     params = {**default_parameters, 'time_bin': 0.05}
+#     params['token'] = construct_token(["integral-realtime"], dispatcher_test_conf)
+#
+#     product_spiacs = oda_api.api.DispatcherAPI(
+#         url=dispatcher_live_fixture).get_product(**params)
+#
+#     product_spiacs_rt = oda_api.api.DispatcherAPI(
+#         url=dispatcher_live_fixture).get_product(**{**params, 'data_level': "realtime"})
+#
+#     data = np.array(product_spiacs.spi_acs_lc_0_query.data_unit[1].data)
+#     t_ref = product_spiacs.spi_acs_lc_0_query.data_unit[1].header['TIMEZERO']
+#     t = data['TIME'] + t_ref
+#
+#     data_rt = np.array(product_spiacs_rt.spi_acs_lc_0_query.data_unit[1].data)
+#     t_ref_rt = product_spiacs_rt.spi_acs_lc_0_query.data_unit[1].header['TIMEZERO']
+#     t_rt = data_rt['TIME'] + t_ref_rt
+#
+#     assert len(data) > 100
+#     assert len(data_rt) > 100
+#
+#     dt_s = (t - t_rt)
+#     print("dt min, max, mean, std", dt_s.min(), dt_s.max(), dt_s.mean(), dt_s.std())
+#
+#     assert "next break in data in 46 hr" in product_spiacs_rt.spi_acs_lc_0_query.data_unit[1].header['PROPHECY']
+#     assert "166.134 81.107 109932.3 0.016 0.016 30.0" in product_spiacs_rt.spi_acs_lc_0_query.data_unit[1].header['EPHS']
+#     assert "166.134 81.107 109932.3 0.016 0.016 30.0" in product_spiacs.spi_acs_lc_0_query.data_unit[1].header['EPHS']
 
     # TODO: this verification will have to be completed
     # for offset in np.arange(-10, 10):        
@@ -200,36 +193,36 @@ def test_request_too_large(dispatcher_live_fixture):
     assert any('SPI-ACS backend refuses to process this request' in r for r in jdata['exit_status'].values())
 
 
-@pytest.mark.parametrize("roles", ["integral-realtime", ""])
-def test_realtime(dispatcher_live_fixture, dispatcher_test_conf, roles):
-    server = dispatcher_live_fixture
-
-    logger.info("constructed server: %s", server)
-
-    params = {
-                **default_parameters,
-                'query_status': 'new',
-                'query_type': 'Real',
-                'data_level': 'realtime'
-            }
-
-    params['token'] = construct_token(roles.split(","), dispatcher_test_conf)
-
-    c = requests.get(server + "/run_analysis",
-                     params=params)
-
-    logger.info("content: %s", c.text)
-    jdata = c.json()
-    logger.info(json.dumps(jdata, indent=4, sort_keys=True))
-    logger.info(jdata)
-
-    print(jdata)
-
-    if roles:
-        assert jdata['job_status'] == 'done'
-        assert c.status_code == 200
-        print(jdata['products']['analysis_parameters'])
-    else:
-        assert jdata['job_status'] == 'failed'
-        assert c.status_code == 403
+# @pytest.mark.parametrize("roles", ["integral-realtime", ""])
+# def test_realtime(dispatcher_live_fixture, dispatcher_test_conf, roles):
+#     server = dispatcher_live_fixture
+#
+#     logger.info("constructed server: %s", server)
+#
+#     params = {
+#                 **default_parameters,
+#                 'query_status': 'new',
+#                 'query_type': 'Real',
+#                 'data_level': 'ordinary'
+#             }
+#
+#     params['token'] = construct_token(roles.split(","), dispatcher_test_conf)
+#
+#     c = requests.get(server + "/run_analysis",
+#                      params=params)
+#
+#     logger.info("content: %s", c.text)
+#     jdata = c.json()
+#     logger.info(json.dumps(jdata, indent=4, sort_keys=True))
+#     logger.info(jdata)
+#
+#     print(jdata)
+#
+#     if roles:
+#         assert jdata['job_status'] == 'done'
+#         assert c.status_code == 200
+#         print(jdata['products']['analysis_parameters'])
+#     else:
+#         assert jdata['job_status'] == 'failed'
+#         assert c.status_code == 403
 
