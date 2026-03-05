@@ -36,7 +36,7 @@ where = ["."]
 dispatcher_plugin_integral_all_sky = ['config_dir/*']
 
 [tool.uv.sources]
-cdci-data-analysis = { git = "https://github.com/oda-hub/dispatcher-app.git" }
+cdci-data-analysis = {git = "https://github.com/oda-hub/dispatcher-app.git", group="dev"}
 
 [dependency-groups]
 dev = [
@@ -46,4 +46,5 @@ dev = [
     "psutil>=7.2.2",
     "pylint>=3.3.8",
     "pytest>=9.0.2",
+    "cdci-data-analysis"
 ]

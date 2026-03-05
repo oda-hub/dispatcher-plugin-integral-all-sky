@@ -846,6 +846,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "cdci-data-analysis" },
     { name = "coverage" },
     { name = "flake8" },
     { name = "mypy" },
@@ -857,7 +858,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "astropy" },
-    { name = "cdci-data-analysis", git = "https://github.com/oda-hub/dispatcher-app.git" },
+    { name = "cdci-data-analysis" },
     { name = "numpy" },
     { name = "oda-api" },
     { name = "simple-logger" },
@@ -865,6 +866,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "cdci-data-analysis", git = "https://github.com/oda-hub/dispatcher-app.git" },
     { name = "coverage", specifier = ">=7.13.4" },
     { name = "flake8", specifier = ">=7.3.0" },
     { name = "mypy", specifier = ">=1.17.1" },
