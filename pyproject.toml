@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = 'setuptools.build_meta'
+
+[project]
+name = "dispatcher-plugin-integral-all-sky"
+version = "1.0"
+description = "A plugin for online data analysis"
+authors = [
+    {name = "Andrea Tramacere", email = "andrea.tramacere@unige.ch"},
+]
+maintainers = [
+  {name = "Volodymyr Savchenko", email = "contact@odahub.io"},
+  {name = "Denys Savchenko", email = "contact@odahub.io"}
+]
+readme = "README.md"
+license = "MIT"
+
+requires-python = ">=3.10"
+
+dependencies = [
+    "astropy",
+    "simple_logger",
+    "numpy",
+    "oda_api",
+    "cdci-data-analysis",
+]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.setuptools.package-data]
+dispatcher_plugin_integral_all_sky = ['config_dir/*']
+
+[tool.uv.sources]
+cdci-data-analysis = {git = "https://github.com/oda-hub/dispatcher-app.git", group="dev"}
+
+[dependency-groups]
+dev = [
+    "coverage>=7.13.4",
+    "flake8>=7.3.0",
+    "mypy>=1.17.1",
+    "psutil>=7.2.2",
+    "pylint>=3.3.8",
+    "pytest>=9.0.2",
+    "cdci-data-analysis"
+]
